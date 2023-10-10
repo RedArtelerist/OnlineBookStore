@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/book_store?serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 611001
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
