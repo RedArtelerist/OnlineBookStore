@@ -10,18 +10,12 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class OnlineBookStoreApplication {
-    private final BookService bookService;
-
-    public OnlineBookStoreApplication(BookService bookService) {
-        this.bookService = bookService;
-    }
-
     public static void main(String[] args) {
         SpringApplication.run(OnlineBookStoreApplication.class, args);
     }
 
     @Bean
-    public CommandLineRunner commandLineRunner() {
+    public CommandLineRunner commandLineRunner(BookService bookService) {
         return args -> {
             Book book = new Book();
             book.setTitle("Effective Java");

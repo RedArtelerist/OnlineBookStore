@@ -1,20 +1,18 @@
 package mate.academy.bookstore.repository.impl;
 
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import mate.academy.bookstore.exception.BookNotFoundException;
+import mate.academy.bookstore.exception.BookNotSavedException;
 import mate.academy.bookstore.model.Book;
 import mate.academy.bookstore.repository.BookRepository;
 import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor
 public class BookRepositoryImpl implements BookRepository {
     private final SessionFactory sessionFactory;
-
-    @Autowired
-    public BookRepositoryImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
 
     @Override
     public Book save(Book book) {
@@ -22,7 +20,7 @@ public class BookRepositoryImpl implements BookRepository {
             sessionFactory.inTransaction(session -> session.persist(book));
             return book;
         } catch (Exception e) {
-            throw new RuntimeException("Can't create new book", e);
+            throw new BookNotSavedException("Can't create new book", e);
         }
     }
 
@@ -33,7 +31,7 @@ public class BookRepositoryImpl implements BookRepository {
                     session -> session.createQuery("from Book", Book.class).getResultList()
             );
         } catch (Exception e) {
-            throw new RuntimeException("Can't load list of books", e);
+            throw new BookNotFoundException("Can't load list of books", e);
         }
     }
 }
