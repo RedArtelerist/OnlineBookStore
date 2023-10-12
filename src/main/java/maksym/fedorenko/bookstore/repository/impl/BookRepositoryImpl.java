@@ -1,11 +1,11 @@
-package mate.academy.bookstore.repository.impl;
+package maksym.fedorenko.bookstore.repository.impl;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import mate.academy.bookstore.exception.BookNotFoundException;
-import mate.academy.bookstore.exception.BookNotSavedException;
-import mate.academy.bookstore.model.Book;
-import mate.academy.bookstore.repository.BookRepository;
+import maksym.fedorenko.bookstore.exception.BookNotFoundException;
+import maksym.fedorenko.bookstore.model.Book;
+import maksym.fedorenko.bookstore.repository.BookRepository;
+import maksym.fedorenko.bookstore.exception.BookNotSavedException;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 

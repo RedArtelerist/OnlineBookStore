@@ -1,4 +1,4 @@
-package mate.academy.bookstore.exception;
+package maksym.fedorenko.bookstore.exception;
 
 public class BookNotFoundException extends RuntimeException {
     public BookNotFoundException(String message, Throwable cause) {

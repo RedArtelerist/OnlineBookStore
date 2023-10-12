@@ -1,4 +1,4 @@
-package mate.academy.bookstore.exception;
+package maksym.fedorenko.bookstore.exception;
 
 public class BookNotSavedException extends RuntimeException {
     public BookNotSavedException(String message, Throwable cause) {

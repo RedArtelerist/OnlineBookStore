@@ -1,10 +1,10 @@
-package mate.academy.bookstore.service.impl;
+package maksym.fedorenko.bookstore.service.impl;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import mate.academy.bookstore.model.Book;
-import mate.academy.bookstore.repository.BookRepository;
-import mate.academy.bookstore.service.BookService;
+import maksym.fedorenko.bookstore.model.Book;
+import maksym.fedorenko.bookstore.repository.BookRepository;
+import maksym.fedorenko.bookstore.service.BookService;
 import org.springframework.stereotype.Service;
 
 @Service

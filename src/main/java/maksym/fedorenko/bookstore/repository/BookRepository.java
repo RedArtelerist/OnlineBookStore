@@ -1,7 +1,7 @@
-package mate.academy.bookstore.repository;
+package maksym.fedorenko.bookstore.repository;
 
 import java.util.List;
-import mate.academy.bookstore.model.Book;
+import maksym.fedorenko.bookstore.model.Book;
 
 public interface BookRepository {
     Book save(Book book);

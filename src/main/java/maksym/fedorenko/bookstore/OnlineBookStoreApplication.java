@@ -1,8 +1,8 @@
-package mate.academy.bookstore;
+package maksym.fedorenko.bookstore;
 
 import java.math.BigDecimal;
-import mate.academy.bookstore.model.Book;
-import mate.academy.bookstore.service.BookService;
+import maksym.fedorenko.bookstore.model.Book;
+import maksym.fedorenko.bookstore.service.BookService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package mate.academy.bookstore;
+package maksym.fedorenko.bookstore;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
