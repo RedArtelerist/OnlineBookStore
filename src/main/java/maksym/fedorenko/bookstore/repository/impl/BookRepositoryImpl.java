@@ -3,9 +3,9 @@ package maksym.fedorenko.bookstore.repository.impl;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import maksym.fedorenko.bookstore.exception.BookNotFoundException;
+import maksym.fedorenko.bookstore.exception.BookNotSavedException;
 import maksym.fedorenko.bookstore.model.Book;
 import maksym.fedorenko.bookstore.repository.BookRepository;
-import maksym.fedorenko.bookstore.exception.BookNotSavedException;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 
