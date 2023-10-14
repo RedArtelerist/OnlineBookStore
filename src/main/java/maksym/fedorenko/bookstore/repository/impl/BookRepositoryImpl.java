@@ -38,8 +38,14 @@ public class BookRepositoryImpl implements BookRepository {
 
     @Override
     public Optional<Book> findById(Long id) {
-        return sessionFactory.fromSession(
-                session -> Optional.ofNullable(session.find(Book.class, id))
-        );
+        try {
+            return sessionFactory.fromSession(
+                    session -> Optional.ofNullable(session.find(Book.class, id))
+            );
+        } catch (Exception e) {
+            throw new EntityNotFoundException(
+                    "Obtaining the book by id=%d was a failed".formatted(id), e
+            );
+        }
     }
 }
