@@ -20,17 +20,20 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
 
+    @Override
     public BookDto save(CreateBookRequestDto requestDto) {
-        Book book = bookRepository.save(bookMapper.toModel(requestDto));
+        Book book = bookRepository.save(bookMapper.toBook(requestDto));
         return bookMapper.toDto(book);
     }
 
+    @Override
     public List<BookDto> findAll() {
         return bookRepository.findAll().stream()
                 .map(bookMapper::toDto)
                 .toList();
     }
 
+    @Override
     public List<BookDto> searchBooksByParameters(BookSearchParametersDto searchDto) {
         return StreamSupport.stream(bookRepository
                         .findAll(searchDto.getFilterPredicate(QBook.book))
@@ -39,19 +42,30 @@ public class BookServiceImpl implements BookService {
                 .toList();
     }
 
+    @Override
     public BookDto getById(Long id) {
-        Book book = bookRepository.findById(id)
+        return bookRepository.findById(id)
+                .map(bookMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException("Can't find book by id: " + id));
-        return bookMapper.toDto(book);
     }
 
+    @Override
     public BookDto update(Long id, CreateBookRequestDto requestDto) {
-        Book book = bookMapper.toModel(requestDto);
+        checkIfBookExistsById(id);
+        Book book = bookMapper.toBook(requestDto);
         book.setId(id);
         return bookMapper.toDto(bookRepository.save(book));
     }
 
+    @Override
     public void delete(Long id) {
+        checkIfBookExistsById(id);
         bookRepository.deleteById(id);
+    }
+
+    private void checkIfBookExistsById(Long id) {
+        if (!bookRepository.existsById(id)) {
+            throw new EntityNotFoundException("Book with id=%d doesn't exist".formatted(id));
+        }
     }
 }
