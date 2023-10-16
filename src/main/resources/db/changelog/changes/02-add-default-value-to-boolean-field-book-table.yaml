@@ -1,9 +1,0 @@
-databaseChangeLog:
-  - changeSet:
-      id: add-default-value-to-is-deleted-field-in-book-table
-      author: MaksymFedorenko
-      changes:
-        - addDefaultValue:
-            tableName: books
-            columnName: is_deleted
-            defaultValueBoolean: false
