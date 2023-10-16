@@ -13,6 +13,7 @@ import maksym.fedorenko.bookstore.model.Book;
 import maksym.fedorenko.bookstore.model.QBook;
 import maksym.fedorenko.bookstore.repository.BookRepository;
 import maksym.fedorenko.bookstore.service.BookService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -28,16 +29,18 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDto> findAll() {
-        return bookRepository.findAll().stream()
+    public List<BookDto> findAll(Pageable pageable) {
+        return bookRepository.findAll(pageable).stream()
                 .map(bookMapper::toDto)
                 .toList();
     }
 
     @Override
-    public List<BookDto> searchBooksByParameters(BookSearchParametersDto searchDto) {
+    public List<BookDto> searchBooksByParameters(
+            BookSearchParametersDto searchDto, Pageable pageable
+    ) {
         return StreamSupport.stream(bookRepository
-                        .findAll(searchDto.getFilterPredicate(QBook.book))
+                        .findAll(searchDto.getFilterPredicate(QBook.book), pageable)
                         .spliterator(), false)
                 .map(bookMapper::toDto)
                 .toList();

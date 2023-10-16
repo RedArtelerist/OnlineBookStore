@@ -1,5 +1,7 @@
 package maksym.fedorenko.bookstore.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +10,7 @@ import maksym.fedorenko.bookstore.dto.BookSearchParametersDto;
 import maksym.fedorenko.bookstore.dto.CreateBookRequestDto;
 import maksym.fedorenko.bookstore.dto.UpdateBookRequestDto;
 import maksym.fedorenko.bookstore.service.BookService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,28 +22,45 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Book management", description = "Endpoints for mapping books")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/books")
 public class BookController {
     private final BookService bookService;
 
+    @Operation(
+            summary = "Retrieve all books",
+            description = "Receiving all books with pagination and sorting by fields."
+    )
     @GetMapping
-    public List<BookDto> getAll() {
-        return bookService.findAll();
+    public List<BookDto> getAll(Pageable pageable) {
+        return bookService.findAll(pageable);
     }
 
+    @Operation(
+            summary = "Retrieve a book by id",
+            description = "Get a book object by specifying its id."
+    )
     @GetMapping("/{id}")
     public BookDto getBookById(@PathVariable Long id) {
         return bookService.getById(id);
     }
 
+    @Operation(
+            summary = "Create a new book",
+            description = "Create a new book by specifying fields."
+    )
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BookDto createBook(@RequestBody @Valid CreateBookRequestDto bookDto) {
         return bookService.save(bookDto);
     }
 
+    @Operation(
+            summary = "Update existing book",
+            description = "Update existing book by different fields."
+    )
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public BookDto updateBook(
@@ -49,14 +69,23 @@ public class BookController {
         return bookService.update(id, bookDto);
     }
 
+    @Operation(
+            summary = "Delete book by id",
+            description = "Delete a book object by specifying its id."
+    )
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBook(@PathVariable Long id) {
         bookService.delete(id);
     }
 
+    @Operation(
+            summary = "Search books by different parameters",
+            description = "Search books by title, specify a selection of authors, "
+                    + "and indicate the minimum and maximum price ranges."
+    )
     @GetMapping("/search")
-    public List<BookDto> searchBooks(BookSearchParametersDto searchParameters) {
-        return bookService.searchBooksByParameters(searchParameters);
+    public List<BookDto> searchBooks(BookSearchParametersDto searchParameters, Pageable pageable) {
+        return bookService.searchBooksByParameters(searchParameters, pageable);
     }
 }
