@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import maksym.fedorenko.bookstore.dto.BookDto;
 import maksym.fedorenko.bookstore.dto.BookSearchParametersDto;
 import maksym.fedorenko.bookstore.dto.CreateBookRequestDto;
+import maksym.fedorenko.bookstore.dto.UpdateBookRequestDto;
 import maksym.fedorenko.bookstore.exception.EntityNotFoundException;
 import maksym.fedorenko.bookstore.mapper.BookMapper;
 import maksym.fedorenko.bookstore.model.Book;
@@ -50,10 +51,10 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookDto update(Long id, CreateBookRequestDto requestDto) {
-        checkIfBookExistsById(id);
-        Book book = bookMapper.toBook(requestDto);
-        book.setId(id);
+    public BookDto update(Long id, UpdateBookRequestDto requestDto) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Can't find book by id: " + id));
+        requestDto.updateBook(book);
         return bookMapper.toDto(bookRepository.save(book));
     }
 

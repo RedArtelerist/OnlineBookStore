@@ -4,6 +4,7 @@ import java.util.List;
 import maksym.fedorenko.bookstore.dto.BookDto;
 import maksym.fedorenko.bookstore.dto.BookSearchParametersDto;
 import maksym.fedorenko.bookstore.dto.CreateBookRequestDto;
+import maksym.fedorenko.bookstore.dto.UpdateBookRequestDto;
 
 public interface BookService {
     BookDto save(CreateBookRequestDto requestDto);
@@ -14,7 +15,7 @@ public interface BookService {
 
     BookDto getById(Long id);
 
-    BookDto update(Long id, CreateBookRequestDto requestDto);
+    BookDto update(Long id, UpdateBookRequestDto requestDto);
 
     void delete(Long id);
 }
