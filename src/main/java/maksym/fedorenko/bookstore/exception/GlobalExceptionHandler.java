@@ -4,64 +4,56 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpHeaders;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-@ControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers,
-            HttpStatusCode status, WebRequest request
+@Slf4j
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleInvalidArguments(
+            MethodArgumentNotValidException ex, WebRequest request
     ) {
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST);
         List<String> errors = ex.getBindingResult().getAllErrors().stream()
                 .map(this::getErrorMessage)
                 .toList();
+        body.put("error", "bad-request");
+        body.put("time", LocalDateTime.now());
         body.put("errors", errors);
-        return new ResponseEntity<>(body, headers, status);
+
+        String requestUri = ((ServletWebRequest) request).getRequest().getRequestURI();
+        log.debug("Validation errors for {}: {}", requestUri, errors);
+        return new ResponseEntity<Object>(body, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = EntityNotFoundException.class)
-    protected ResponseEntity<Object> handleEntityNotFoundException(RuntimeException ex) {
-        HttpStatus status = HttpStatus.NOT_FOUND;
-        return getResponseEntity(ex, status);
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected ErrorResponseWrapper handleEntityNotFoundException(EntityNotFoundException ex) {
+        return new ErrorResponseWrapper(LocalDateTime.now(), "entity-not-found", ex.getMessage());
     }
 
     @ExceptionHandler(value = EntityNotSavedException.class)
-    protected ResponseEntity<Object> handleEntityNotSavedException(RuntimeException ex) {
-        return getResponseEntity(ex, HttpStatus.BAD_REQUEST);
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ErrorResponseWrapper handleEntityNotSavedException(EntityNotSavedException ex) {
+        return new ErrorResponseWrapper(LocalDateTime.now(), "entity-not-saved", ex.getMessage());
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Object> handleConflict(RuntimeException ex) {
-        return getResponseEntity(ex, HttpStatus.CONFLICT);
-    }
-
-    private ResponseEntity<Object> getResponseEntity(RuntimeException ex, HttpStatus status) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", status);
-        body.put("errors", ex.getMessage());
-        return new ResponseEntity<>(body, status);
-    }
-
-    private String getErrorMessage(ObjectError error) {
-        if (error instanceof FieldError) {
-            return ((FieldError) error).getField() + " " + error.getDefaultMessage();
+    private String getErrorMessage(ObjectError e) {
+        if (e instanceof FieldError) {
+            String field = ((FieldError) e).getField();
+            String message = e.getDefaultMessage();
+            return field + " " + message;
         }
-        return error.getDefaultMessage();
+        return e.getDefaultMessage();
     }
 }

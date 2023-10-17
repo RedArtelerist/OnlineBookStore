@@ -1,6 +1,7 @@
 package maksym.fedorenko.bookstore.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import maksym.fedorenko.bookstore.dto.BookDto;
@@ -31,7 +32,7 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    public BookDto getBookById(@PathVariable Long id) {
+    public BookDto getBookById(@PathVariable @Positive Long id) {
         return bookService.getById(id);
     }
 
@@ -44,7 +45,7 @@ public class BookController {
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public BookDto updateBook(
-            @PathVariable Long id, @RequestBody @Valid UpdateBookRequestDto bookDto
+            @PathVariable @Positive Long id, @RequestBody @Valid UpdateBookRequestDto bookDto
     ) {
         return bookService.update(id, bookDto);
     }
@@ -56,7 +57,7 @@ public class BookController {
     }
 
     @GetMapping("/search")
-    public List<BookDto> searchBooks(BookSearchParametersDto searchParameters) {
+    public List<BookDto> searchBooks(@Valid BookSearchParametersDto searchParameters) {
         return bookService.searchBooksByParameters(searchParameters);
     }
 }
