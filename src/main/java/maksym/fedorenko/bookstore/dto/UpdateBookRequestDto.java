@@ -20,7 +20,7 @@ public record UpdateBookRequestDto(
         if (author != null && !author.isBlank()) {
             book.setAuthor(author);
         }
-        if (isbn != null && isbn.isBlank()) {
+        if (isbn != null && !isbn.isBlank()) {
             book.setIsbn(isbn);
         }
         if (price != null) {
