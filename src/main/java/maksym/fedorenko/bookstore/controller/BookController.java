@@ -3,6 +3,7 @@ package maksym.fedorenko.bookstore.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import maksym.fedorenko.bookstore.dto.BookDto;
@@ -43,7 +44,7 @@ public class BookController {
             description = "Get a book object by specifying its id."
     )
     @GetMapping("/{id}")
-    public BookDto getBookById(@PathVariable Long id) {
+    public BookDto getBookById(@PathVariable @Positive Long id) {
         return bookService.getById(id);
     }
 
@@ -64,7 +65,7 @@ public class BookController {
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public BookDto updateBook(
-            @PathVariable Long id, @RequestBody @Valid UpdateBookRequestDto bookDto
+            @PathVariable @Positive Long id, @RequestBody @Valid UpdateBookRequestDto bookDto
     ) {
         return bookService.update(id, bookDto);
     }
@@ -75,7 +76,7 @@ public class BookController {
     )
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteBook(@PathVariable Long id) {
+    public void deleteBook(@PathVariable @Positive Long id) {
         bookService.delete(id);
     }
 
@@ -85,7 +86,9 @@ public class BookController {
                     + "and indicate the minimum and maximum price ranges."
     )
     @GetMapping("/search")
-    public List<BookDto> searchBooks(BookSearchParametersDto searchParameters, Pageable pageable) {
+    public List<BookDto> searchBooks(
+            @Valid BookSearchParametersDto searchParameters, Pageable pageable
+    ) {
         return bookService.searchBooksByParameters(searchParameters, pageable);
     }
 }
