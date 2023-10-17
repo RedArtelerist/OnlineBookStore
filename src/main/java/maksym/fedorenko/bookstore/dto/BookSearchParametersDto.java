@@ -2,20 +2,17 @@ package maksym.fedorenko.bookstore.dto;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
-import lombok.Data;
 import maksym.fedorenko.bookstore.model.QBook;
+import org.hibernate.validator.constraints.Length;
 
-@Data
-public class BookSearchParametersDto {
-    private String title;
-
-    private String[] author;
-
-    private BigDecimal minPrice;
-
-    private BigDecimal maxPrice;
-
+public record BookSearchParametersDto(
+        @Length(min = 3, max = 128) String title,
+        String[] author,
+        @Positive BigDecimal minPrice,
+        @Positive BigDecimal maxPrice
+) {
     public Predicate getFilterPredicate(QBook book) {
         BooleanExpression predicate = book.isNotNull();
         if (title != null) {
