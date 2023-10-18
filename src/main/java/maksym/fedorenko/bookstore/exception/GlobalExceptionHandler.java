@@ -1,5 +1,6 @@
 package maksym.fedorenko.bookstore.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +30,12 @@ public class GlobalExceptionHandler {
         return new ErrorResponseWrapper(LocalDateTime.now(), "bad-request",
                 "Request input parameters are missing or invalid"
         );
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ErrorResponseWrapper handle(ConstraintViolationException ex) {
+        return new ErrorResponseWrapper(LocalDateTime.now(), "bad-request", ex.getMessage());
     }
 
     @ExceptionHandler(value = EntityNotFoundException.class)

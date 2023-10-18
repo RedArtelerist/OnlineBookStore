@@ -12,7 +12,9 @@ import maksym.fedorenko.bookstore.dto.CreateBookRequestDto;
 import maksym.fedorenko.bookstore.dto.UpdateBookRequestDto;
 import maksym.fedorenko.bookstore.service.BookService;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Book management", description = "Endpoints for mapping books")
 @RequiredArgsConstructor
+@Validated
 @RestController
 @RequestMapping("/api/books")
 public class BookController {
@@ -35,7 +38,7 @@ public class BookController {
             description = "Receiving all books with pagination and sorting by fields."
     )
     @GetMapping
-    public List<BookDto> getAll(Pageable pageable) {
+    public List<BookDto> getAll(@PageableDefault(size = 20) Pageable pageable) {
         return bookService.findAll(pageable);
     }
 
@@ -82,12 +85,14 @@ public class BookController {
 
     @Operation(
             summary = "Search books by different parameters",
-            description = "Search books by title, specify a selection of authors, "
-                    + "and indicate the minimum and maximum price ranges."
+            description = """
+                    Search books by title, specify a selection of authors,
+                    and indicate the minimum and maximum price ranges."""
     )
     @GetMapping("/search")
     public List<BookDto> searchBooks(
-            @Valid BookSearchParametersDto searchParameters, Pageable pageable
+            @Valid BookSearchParametersDto searchParameters,
+            @PageableDefault(size = 20) Pageable pageable
     ) {
         return bookService.searchBooksByParameters(searchParameters, pageable);
     }
