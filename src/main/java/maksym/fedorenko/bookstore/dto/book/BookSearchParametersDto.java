@@ -1,4 +1,4 @@
-package maksym.fedorenko.bookstore.dto;
+package maksym.fedorenko.bookstore.dto.book;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;

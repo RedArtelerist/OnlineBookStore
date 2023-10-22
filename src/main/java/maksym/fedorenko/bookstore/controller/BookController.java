@@ -6,20 +6,21 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import maksym.fedorenko.bookstore.dto.BookDto;
-import maksym.fedorenko.bookstore.dto.BookSearchParametersDto;
-import maksym.fedorenko.bookstore.dto.CreateBookRequestDto;
-import maksym.fedorenko.bookstore.dto.UpdateBookRequestDto;
+import maksym.fedorenko.bookstore.dto.book.BookDto;
+import maksym.fedorenko.bookstore.dto.book.BookSearchParametersDto;
+import maksym.fedorenko.bookstore.dto.book.CreateBookRequestDto;
+import maksym.fedorenko.bookstore.dto.book.UpdateBookRequestDto;
 import maksym.fedorenko.bookstore.service.BookService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -57,6 +58,7 @@ public class BookController {
     )
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public BookDto createBook(@RequestBody @Valid CreateBookRequestDto bookDto) {
         return bookService.save(bookDto);
     }
@@ -65,8 +67,9 @@ public class BookController {
             summary = "Update existing book",
             description = "Update existing book by different fields."
     )
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
+    @PreAuthorize("hasRole('ADMIN')")
     public BookDto updateBook(
             @PathVariable @Positive Long id, @RequestBody @Valid UpdateBookRequestDto bookDto
     ) {
@@ -79,6 +82,7 @@ public class BookController {
     )
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteBook(@PathVariable @Positive Long id) {
         bookService.delete(id);
     }

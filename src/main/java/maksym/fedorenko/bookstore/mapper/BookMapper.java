@@ -1,8 +1,8 @@
 package maksym.fedorenko.bookstore.mapper;
 
-import maksym.fedorenko.bookstore.dto.BookDto;
-import maksym.fedorenko.bookstore.dto.CreateBookRequestDto;
-import maksym.fedorenko.bookstore.dto.UpdateBookRequestDto;
+import maksym.fedorenko.bookstore.dto.book.BookDto;
+import maksym.fedorenko.bookstore.dto.book.CreateBookRequestDto;
+import maksym.fedorenko.bookstore.dto.book.UpdateBookRequestDto;
 import maksym.fedorenko.bookstore.model.Book;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.InjectionStrategy;
