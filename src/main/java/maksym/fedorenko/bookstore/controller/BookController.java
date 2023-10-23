@@ -39,6 +39,7 @@ public class BookController {
             description = "Receiving all books with pagination and sorting by fields."
     )
     @GetMapping
+    @PreAuthorize("hasRole('USER')")
     public List<BookDto> getAll(@PageableDefault(size = 20) Pageable pageable) {
         return bookService.findAll(pageable);
     }
@@ -48,6 +49,7 @@ public class BookController {
             description = "Get a book object by specifying its id."
     )
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
     public BookDto getBookById(@PathVariable @Positive Long id) {
         return bookService.getById(id);
     }
@@ -94,6 +96,7 @@ public class BookController {
                     and indicate the minimum and maximum price ranges."""
     )
     @GetMapping("/search")
+    @PreAuthorize("hasRole('USER')")
     public List<BookDto> searchBooks(
             @Valid BookSearchParametersDto searchParameters,
             @PageableDefault(size = 20) Pageable pageable

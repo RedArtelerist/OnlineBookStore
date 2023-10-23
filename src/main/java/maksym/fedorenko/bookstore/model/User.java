@@ -43,7 +43,7 @@ public class User implements UserDetails {
     @Column(name = "shipping_address", nullable = false)
     private String shippingAddress;
 
-    @Column(nullable = false)
+    @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
     @ManyToMany
