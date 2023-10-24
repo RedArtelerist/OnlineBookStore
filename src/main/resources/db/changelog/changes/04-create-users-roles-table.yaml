@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-users-roles-table
+      author: MaksymFedorenko
+      changes:
+        - createTable:
+            tableName: users_roles
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: role_id
+                  type: BIGINT
+  - changeSet:
+      id: add-composite-primary-key-on-users-roles-table
+      author: MaksymFedorenko
+      changes:
+        - addPrimaryKey:
+            columnNames: user_id, role_id
+            tableName: users_roles

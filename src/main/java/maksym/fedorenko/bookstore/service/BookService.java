@@ -1,10 +1,10 @@
 package maksym.fedorenko.bookstore.service;
 
 import java.util.List;
-import maksym.fedorenko.bookstore.dto.BookDto;
-import maksym.fedorenko.bookstore.dto.BookSearchParametersDto;
-import maksym.fedorenko.bookstore.dto.CreateBookRequestDto;
-import maksym.fedorenko.bookstore.dto.UpdateBookRequestDto;
+import maksym.fedorenko.bookstore.dto.book.BookDto;
+import maksym.fedorenko.bookstore.dto.book.BookSearchParametersDto;
+import maksym.fedorenko.bookstore.dto.book.CreateBookRequestDto;
+import maksym.fedorenko.bookstore.dto.book.UpdateBookRequestDto;
 import org.springframework.data.domain.Pageable;
 
 public interface BookService {

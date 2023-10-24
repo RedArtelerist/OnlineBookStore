@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-default-roles-to-db
+      author: MaksymFedorenko
+      changes:
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: USER
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: ADMIN
