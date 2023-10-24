@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-books-categories-table
+      author: MaksymFedorenko
+      changes:
+        - createTable:
+            tableName: books_categories
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: book_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: category_id
+                  type: BIGINT
+  - changeSet:
+      id: add-composite-primary-key-on-books-categories-table
+      author: MaksymFedorenko
+      changes:
+        - addPrimaryKey:
+            columnNames: book_id, category_id
+            tableName: books_categories
