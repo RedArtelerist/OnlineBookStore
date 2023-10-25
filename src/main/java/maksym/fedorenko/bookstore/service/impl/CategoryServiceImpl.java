@@ -2,15 +2,12 @@ package maksym.fedorenko.bookstore.service.impl;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import maksym.fedorenko.bookstore.dto.book.BookDtoWithoutCategories;
 import maksym.fedorenko.bookstore.dto.category.CategoryDto;
 import maksym.fedorenko.bookstore.dto.category.CreateCategoryRequestDto;
 import maksym.fedorenko.bookstore.dto.category.UpdateCategoryRequestDto;
 import maksym.fedorenko.bookstore.exception.EntityNotFoundException;
-import maksym.fedorenko.bookstore.mapper.BookMapper;
 import maksym.fedorenko.bookstore.mapper.CategoryMapper;
 import maksym.fedorenko.bookstore.model.Category;
-import maksym.fedorenko.bookstore.repository.BookRepository;
 import maksym.fedorenko.bookstore.repository.CategoryRepository;
 import maksym.fedorenko.bookstore.service.CategoryService;
 import org.springframework.data.domain.Pageable;
@@ -20,9 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
-    private final BookRepository bookRepository;
     private final CategoryMapper categoryMapper;
-    private final BookMapper bookMapper;
 
     @Override
     public CategoryDto save(CreateCategoryRequestDto requestDto) {
@@ -60,15 +55,6 @@ public class CategoryServiceImpl implements CategoryService {
     public void delete(Long id) {
         checkIfExistsById(id);
         categoryRepository.deleteById(id);
-    }
-
-    @Override
-    public List<BookDtoWithoutCategories> findBooksByCategoryId(Long id, Pageable pageable) {
-        checkIfExistsById(id);
-        return bookRepository.findAllByCategoriesId(id, pageable)
-                .stream()
-                .map(bookMapper::toDtoWithoutCategories)
-                .toList();
     }
 
     private void checkIfExistsById(Long id) {

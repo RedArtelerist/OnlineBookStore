@@ -10,6 +10,7 @@ import maksym.fedorenko.bookstore.dto.book.BookDtoWithoutCategories;
 import maksym.fedorenko.bookstore.dto.category.CategoryDto;
 import maksym.fedorenko.bookstore.dto.category.CreateCategoryRequestDto;
 import maksym.fedorenko.bookstore.dto.category.UpdateCategoryRequestDto;
+import maksym.fedorenko.bookstore.service.BookService;
 import maksym.fedorenko.bookstore.service.CategoryService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 public class CategoryController {
     private final CategoryService categoryService;
+    private final BookService bookService;
 
     @Operation(
             summary = "Create a new category",
@@ -96,6 +98,6 @@ public class CategoryController {
     @PreAuthorize("hasRole('USER')")
     public List<BookDtoWithoutCategories> getBooksByCategoryId(
             @PathVariable @Positive Long id, Pageable pageable) {
-        return categoryService.findBooksByCategoryId(id, pageable);
+        return bookService.findBooksByCategoryId(id, pageable);
     }
 }

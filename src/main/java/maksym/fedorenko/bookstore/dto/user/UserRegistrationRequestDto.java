@@ -14,9 +14,9 @@ import maksym.fedorenko.bookstore.validation.FieldsValueMatch;
 public record UserRegistrationRequestDto(
         @NotNull @Email
         String email,
-        @NotNull @Size(min = 2, max = 32)
+        @NotNull @Size(max = 32)
         String firstName,
-        @NotNull @Size(min = 2, max = 32)
+        @NotNull @Size(max = 32)
         String lastName,
         @NotNull @Size(max = 128)
         String shippingAddress,

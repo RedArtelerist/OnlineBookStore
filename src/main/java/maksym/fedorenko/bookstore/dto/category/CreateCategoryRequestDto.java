@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 
 public record CreateCategoryRequestDto(
         @NotNull
-        @Size(min = 3, max = 32)
+        @Size(max = 32)
         String name,
         @Size(max = 256)
         String description) {

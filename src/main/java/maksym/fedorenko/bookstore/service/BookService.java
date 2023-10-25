@@ -2,6 +2,7 @@ package maksym.fedorenko.bookstore.service;
 
 import java.util.List;
 import maksym.fedorenko.bookstore.dto.book.BookDto;
+import maksym.fedorenko.bookstore.dto.book.BookDtoWithoutCategories;
 import maksym.fedorenko.bookstore.dto.book.BookSearchParametersDto;
 import maksym.fedorenko.bookstore.dto.book.CreateBookRequestDto;
 import maksym.fedorenko.bookstore.dto.book.UpdateBookRequestDto;
@@ -19,4 +20,6 @@ public interface BookService {
     BookDto update(Long id, UpdateBookRequestDto requestDto);
 
     void delete(Long id);
+
+    List<BookDtoWithoutCategories> findBooksByCategoryId(Long id, Pageable pageable);
 }

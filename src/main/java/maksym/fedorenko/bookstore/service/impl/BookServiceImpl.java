@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import maksym.fedorenko.bookstore.dto.book.BookDto;
+import maksym.fedorenko.bookstore.dto.book.BookDtoWithoutCategories;
 import maksym.fedorenko.bookstore.dto.book.BookSearchParametersDto;
 import maksym.fedorenko.bookstore.dto.book.CreateBookRequestDto;
 import maksym.fedorenko.bookstore.dto.book.UpdateBookRequestDto;
@@ -72,6 +73,17 @@ public class BookServiceImpl implements BookService {
     public void delete(Long id) {
         checkIfBookExistsById(id);
         bookRepository.deleteById(id);
+    }
+
+    @Override
+    public List<BookDtoWithoutCategories> findBooksByCategoryId(Long id, Pageable pageable) {
+        if (!categoryRepository.existsById(id)) {
+            throw new EntityNotFoundException("Category with id=%d doesn't exist".formatted(id));
+        }
+        return bookRepository.findAllByCategoriesId(id, pageable)
+                .stream()
+                .map(bookMapper::toDtoWithoutCategories)
+                .toList();
     }
 
     private void addBookCategories(List<Long> categoryIds, Book book) {
