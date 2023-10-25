@@ -47,7 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Can't category book by id: " + id
                 ));
-        categoryMapper.mapUpdateRequestToCategory(requestDto, category);
+        categoryMapper.updateCategory(requestDto, category);
         return categoryMapper.toDto(categoryRepository.save(category));
     }
 

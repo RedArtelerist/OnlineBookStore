@@ -22,7 +22,7 @@ public interface CategoryMapper {
     Category toCategory(CreateCategoryRequestDto requestDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void mapUpdateRequestToCategory(
+    void updateCategory(
             UpdateCategoryRequestDto updateBookRequestDto, @MappingTarget Category category
     );
 }

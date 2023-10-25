@@ -13,6 +13,7 @@ import maksym.fedorenko.bookstore.dto.category.UpdateCategoryRequestDto;
 import maksym.fedorenko.bookstore.service.BookService;
 import maksym.fedorenko.bookstore.service.CategoryService;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -52,7 +53,7 @@ public class CategoryController {
     )
     @GetMapping
     @PreAuthorize("hasRole('USER')")
-    public List<CategoryDto> getAll(Pageable pageable) {
+    public List<CategoryDto> getAll(@PageableDefault Pageable pageable) {
         return categoryService.findAll(pageable);
     }
 
@@ -97,7 +98,7 @@ public class CategoryController {
     @GetMapping("/{id}/books")
     @PreAuthorize("hasRole('USER')")
     public List<BookDtoWithoutCategories> getBooksByCategoryId(
-            @PathVariable @Positive Long id, Pageable pageable) {
+            @PathVariable @Positive Long id, @PageableDefault Pageable pageable) {
         return bookService.findBooksByCategoryId(id, pageable);
     }
 }
