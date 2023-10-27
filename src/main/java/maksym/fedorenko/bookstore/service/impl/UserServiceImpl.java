@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
 
     private Set<Role> getDefaultRoles() {
         return new HashSet<>(Collections.singletonList(
-                repository.findByName(RoleName.ROLE_USER)
+                repository.findByName(RoleName.USER)
         ));
     }
 }

@@ -1,25 +1,25 @@
 databaseChangeLog:
   - changeSet:
-      id: create-users-roles-table
+      id: create-books-categories-table
       author: MaksymFedorenko
       changes:
         - createTable:
-            tableName: users_roles
+            tableName: books_categories
             columns:
               - column:
                   constraints:
                     nullable: false
-                  name: user_id
+                  name: book_id
                   type: BIGINT
               - column:
                   constraints:
                     nullable: false
-                  name: role_id
+                  name: category_id
                   type: BIGINT
   - changeSet:
-      id: add-composite-primary-key-on-users-roles-table
+      id: add-composite-primary-key-on-books-categories-table
       author: MaksymFedorenko
       changes:
         - addPrimaryKey:
-            columnNames: user_id, role_id
-            tableName: users_roles
+            columnNames: book_id, category_id
+            tableName: books_categories

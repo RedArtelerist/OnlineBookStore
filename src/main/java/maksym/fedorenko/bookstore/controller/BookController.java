@@ -56,7 +56,9 @@ public class BookController {
 
     @Operation(
             summary = "Create a new book",
-            description = "Create a new book by specifying fields."
+            description = """
+                    Create a new book by specifying fields.
+                    If you want add categories to book provide a list of IDs"""
     )
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -67,7 +69,9 @@ public class BookController {
 
     @Operation(
             summary = "Update existing book",
-            description = "Update existing book by different fields."
+            description = """
+                    Update existing book by different fields.
+                    If you want update book categories then provide a list of IDs"""
     )
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
