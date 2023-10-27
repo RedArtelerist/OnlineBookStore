@@ -1,9 +1,9 @@
 package maksym.fedorenko.bookstore.service;
 
-import maksym.fedorenko.bookstore.dto.shoppingCart.CartDto;
-import maksym.fedorenko.bookstore.dto.shoppingCart.CartItemDto;
-import maksym.fedorenko.bookstore.dto.shoppingCart.CreateCartItemRequestDto;
-import maksym.fedorenko.bookstore.dto.shoppingCart.UpdateCartItemRequestDto;
+import maksym.fedorenko.bookstore.dto.shoppingcart.CartDto;
+import maksym.fedorenko.bookstore.dto.shoppingcart.CartItemDto;
+import maksym.fedorenko.bookstore.dto.shoppingcart.CreateCartItemRequestDto;
+import maksym.fedorenko.bookstore.dto.shoppingcart.UpdateCartItemRequestDto;
 import org.springframework.security.core.Authentication;
 
 public interface ShoppingCartService {

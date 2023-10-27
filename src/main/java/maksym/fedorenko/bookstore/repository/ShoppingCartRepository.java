@@ -12,7 +12,6 @@ public interface ShoppingCartRepository extends JpaRepository<ShoppingCart, Long
         from ShoppingCart c
         join fetch c.cartItems ci
         join fetch ci.book
-        where c.user.email = :email
-    """)
+        where c.user.email = :email""")
     Optional<ShoppingCart> findByUserEmail(String email);
 }

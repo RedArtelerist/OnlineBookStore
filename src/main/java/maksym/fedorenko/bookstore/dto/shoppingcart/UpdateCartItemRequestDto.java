@@ -1,4 +1,4 @@
-package maksym.fedorenko.bookstore.dto.shoppingCart;
+package maksym.fedorenko.bookstore.dto.shoppingcart;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

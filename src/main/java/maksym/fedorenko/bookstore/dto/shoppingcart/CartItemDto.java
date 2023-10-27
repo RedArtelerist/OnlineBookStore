@@ -1,4 +1,4 @@
-package maksym.fedorenko.bookstore.dto.shoppingCart;
+package maksym.fedorenko.bookstore.dto.shoppingcart;
 
 public record CartItemDto(
         Long id,
