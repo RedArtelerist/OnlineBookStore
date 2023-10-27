@@ -9,9 +9,9 @@ import org.springframework.security.core.Authentication;
 public interface ShoppingCartService {
     CartDto getUserCart(Authentication authentication);
 
-    CartItemDto addCartItem(CreateCartItemRequestDto requestDto);
+    CartItemDto addCartItem(Authentication authentication, CreateCartItemRequestDto requestDto);
 
-    CartItemDto updateCartItem(UpdateCartItemRequestDto requestDto);
+    CartItemDto updateCartItem(Long id, UpdateCartItemRequestDto requestDto);
 
-    void deleteCartItem(Long cartItemId);
+    void deleteCartItem(Long id);
 }
