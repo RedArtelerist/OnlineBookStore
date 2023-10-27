@@ -1,5 +1,7 @@
 package maksym.fedorenko.bookstore.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -25,15 +27,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/cart")
 @Validated
 @RequiredArgsConstructor
+@Tag(name = "Shopping cart management", description = "Endpoints for working with cart")
 public class ShoppingCartController {
     private final ShoppingCartService shoppingCartService;
 
+    @Operation(
+            summary = "Get user cart",
+            description = "Retrieving all items that are contained in the user cart."
+    )
     @GetMapping
     @PreAuthorize("hasRole('USER')")
     public Object getUserCart(Authentication authentication) {
         return shoppingCartService.getUserCart(authentication);
     }
 
+    @Operation(
+            summary = "Add book to user cart",
+            description = "Add a specific book and its quantity to the cart."
+    )
     @PostMapping
     @PreAuthorize("hasRole('USER')")
     @ResponseStatus(HttpStatus.CREATED)
@@ -43,6 +54,10 @@ public class ShoppingCartController {
         return shoppingCartService.addCartItem(authentication, requestDto);
     }
 
+    @Operation(
+            summary = "Update cart item",
+            description = "Update the quantity of a specific item in the cart."
+    )
     @PutMapping("/cart-items/{cartItemId}")
     public Object updateCartItem(
             @Positive @PathVariable Long cartItemId,
@@ -50,6 +65,10 @@ public class ShoppingCartController {
         return shoppingCartService.updateCartItem(cartItemId, requestDto);
     }
 
+    @Operation(
+            summary = "Delete item from cart",
+            description = "Delete specific item from user cart."
+    )
     @DeleteMapping("/cart-items/{cartItemId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCartItem(@Positive @PathVariable Long cartItemId) {
