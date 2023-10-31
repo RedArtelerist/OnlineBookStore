@@ -37,19 +37,23 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public CartItemDto addCartItem(
-            Authentication authentication,
-            CreateCartItemRequestDto requestDto) {
+            Authentication authentication, CreateCartItemRequestDto requestDto) {
         ShoppingCart cart = retrieveUserCartFromDb(authentication.getName());
-        CartItem cartItem = cartItemRepository.findByShoppingCartAndBookId(
-                cart, requestDto.bookId());
-        if (cartItem != null) {
+        CartItem cartItem = cartItemRepository
+                .findByShoppingCartAndBookId(cart, requestDto.bookId())
+                .orElseGet(() -> createCartItemFromRequest(requestDto, cart));
+        if (cartItem.getId() != null) {
             cartItem.setQuantity(cartItem.getQuantity() + requestDto.quantity());
-        } else {
-            cartItem = cartItemMapper.toCartItem(requestDto);
-            cartItem.setShoppingCart(cart);
-            cartItem.setBook(getBookFromCartItem(requestDto));
         }
         return cartItemMapper.toDto(cartItemRepository.save(cartItem));
+    }
+
+    private CartItem createCartItemFromRequest(
+            CreateCartItemRequestDto requestDto, ShoppingCart cart) {
+        CartItem cartItem = cartItemMapper.toCartItem(requestDto);
+        cartItem.setShoppingCart(cart);
+        cartItem.setBook(getBookFromCartItem(requestDto));
+        return cartItem;
     }
 
     @Override

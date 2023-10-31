@@ -1,9 +1,9 @@
 package maksym.fedorenko.bookstore.dto.shoppingcart;
 
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.validator.constraints.Range;
+import jakarta.validation.constraints.Positive;
 
 public record UpdateCartItemRequestDto(
-        @NotNull @Range(min = 1, max = 10)
+        @NotNull @Positive
         Integer quantity) {
 }

@@ -1,6 +1,5 @@
 package maksym.fedorenko.bookstore.config;
 
-import static org.springframework.security.config.Customizer.withDefaults;
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 import lombok.RequiredArgsConstructor;
@@ -40,7 +39,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                antMatcher("/api/auth/**"),
+                                antMatcher("/auth/**"),
                                 antMatcher("/error"),
                                 antMatcher("/swagger-ui/**"),
                                 antMatcher("/v3/api-docs/**")
@@ -49,7 +48,6 @@ public class SecurityConfig {
                         .anyRequest()
                         .authenticated()
                 )
-                .httpBasic(withDefaults())
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(
