@@ -1,7 +1,5 @@
 package maksym.fedorenko.bookstore.config;
 
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
-
 import lombok.RequiredArgsConstructor;
 import maksym.fedorenko.bookstore.security.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
@@ -39,10 +37,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                antMatcher("/auth/**"),
-                                antMatcher("/error"),
-                                antMatcher("/swagger-ui/**"),
-                                antMatcher("/v3/api-docs/**")
+                                "/auth/**",
+                                "/error",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
                         )
                         .permitAll()
                         .anyRequest()
