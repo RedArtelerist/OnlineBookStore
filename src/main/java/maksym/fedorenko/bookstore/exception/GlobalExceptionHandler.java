@@ -68,4 +68,10 @@ public class GlobalExceptionHandler {
     protected ErrorResponseWrapper handleRegistrationException(RegistrationException ex) {
         return new ErrorResponseWrapper(LocalDateTime.now(), "bad-request", ex.getMessage());
     }
+
+    @ExceptionHandler(value = CreateOrderException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ErrorResponseWrapper handleCreateOrderException(CreateOrderException ex) {
+        return new ErrorResponseWrapper(LocalDateTime.now(), "bad-request", ex.getMessage());
+    }
 }
