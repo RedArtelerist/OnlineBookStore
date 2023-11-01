@@ -60,6 +60,6 @@ public class Book {
     )
     private Set<Category> categories = new HashSet<>();
 
-    @OneToMany(mappedBy = "book", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "book", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<CartItem> cartItems = new HashSet<>();
 }

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
         description = "Endpoints for JWT authentication")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthenticationController {
     private final UserService userService;
     private final AuthenticationService authenticationService;

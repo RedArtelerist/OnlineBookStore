@@ -8,13 +8,10 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
 bookstore:
   openapi:
-    dev-url: http://localhost:8080/api
+    dev-url: http://localhost:8080
 jwt:
   expiration: 1200000
   secret: fkaafa1r88)_402492fls;l2=040;fs'104jfjlf1804180
-server:
-  servlet:
-    context-path: /api
 springdoc:
   swagger-ui:
     tags-sorter: alpha
