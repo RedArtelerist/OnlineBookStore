@@ -17,6 +17,7 @@ import maksym.fedorenko.bookstore.repository.OrderItemRepository;
 import maksym.fedorenko.bookstore.repository.OrderRepository;
 import maksym.fedorenko.bookstore.repository.ShoppingCartRepository;
 import maksym.fedorenko.bookstore.service.OrderService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -47,8 +48,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderDto> findAll(Authentication authentication) {
-        return orderRepository.findAllByUserEmail(authentication.getName()).stream()
+    public List<OrderDto> findAll(Authentication authentication, Pageable pageable) {
+        return orderRepository.findAllByUserEmail(authentication.getName(), pageable)
+                .stream()
                 .map(orderMapper::toDto)
                 .toList();
     }
