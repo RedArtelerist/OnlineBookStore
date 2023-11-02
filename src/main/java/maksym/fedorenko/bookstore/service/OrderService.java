@@ -14,7 +14,7 @@ public interface OrderService {
 
     OrderDto getById(Authentication authentication, Long id);
 
-    OrderItemDto getOrderItemById(Authentication authentication, Long orderId, Long id);
+    OrderItemDto getOrderItemById(Authentication authentication, Long id);
 
     OrderDto update(Long id, UpdateOrderRequestDto requestDto);
 }

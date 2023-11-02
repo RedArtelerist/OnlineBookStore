@@ -56,14 +56,14 @@ public class OrderController {
             Authentication authentication,
             @PathVariable @Positive Long orderId,
             @PathVariable @Positive Long id) {
-        return null;
+        return orderService.getOrderItemById(authentication, id);
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public OrderDto update(
             @PathVariable @Positive Long id,
-            @Valid UpdateOrderRequestDto requestDto) {
+            @Valid @RequestBody UpdateOrderRequestDto requestDto) {
         return orderService.update(id, requestDto);
     }
 }

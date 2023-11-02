@@ -11,6 +11,7 @@ import maksym.fedorenko.bookstore.exception.EntityNotFoundException;
 import maksym.fedorenko.bookstore.mapper.OrderItemMapper;
 import maksym.fedorenko.bookstore.mapper.OrderMapper;
 import maksym.fedorenko.bookstore.model.Order;
+import maksym.fedorenko.bookstore.model.OrderItem;
 import maksym.fedorenko.bookstore.model.ShoppingCart;
 import maksym.fedorenko.bookstore.repository.OrderItemRepository;
 import maksym.fedorenko.bookstore.repository.OrderRepository;
@@ -47,17 +48,28 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderDto> findAll(Authentication authentication) {
-        return null;
+        return orderRepository.findAllByUserEmail(authentication.getName()).stream()
+                .map(orderMapper::toDto)
+                .toList();
     }
 
     @Override
     public OrderDto getById(Authentication authentication, Long id) {
-        return null;
+        Order order = orderRepository.findByIdAndUserEmail(id, authentication.getName())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "You don't have an order with id=%d".formatted(id))
+                );
+        return orderMapper.toDto(order);
     }
 
     @Override
-    public OrderItemDto getOrderItemById(Authentication authentication, Long orderId, Long id) {
-        return null;
+    public OrderItemDto getOrderItemById(Authentication authentication, Long id) {
+        OrderItem orderItem = orderItemRepository
+                .findByIdAndOrderUserEmail(id, authentication.getName())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "You don't have an order item with id=%d".formatted(id))
+                );
+        return orderItemMapper.toDto(orderItem);
     }
 
     @Override
@@ -67,6 +79,6 @@ public class OrderServiceImpl implements OrderService {
                         "Can't find order with id=%d".formatted(id))
                 );
         order.setStatus(requestDto.status());
-        return null;
+        return orderMapper.toDto(orderRepository.save(order));
     }
 }

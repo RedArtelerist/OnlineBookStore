@@ -10,7 +10,7 @@ public record OrderDto(
         Long id,
         Long userId,
         List<OrderItemDto> orderItems,
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
         LocalDateTime orderDate,
         BigDecimal total,
         Status status) {
