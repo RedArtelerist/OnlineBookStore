@@ -14,15 +14,13 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @Entity
 @Table(name = "books")
 @SQLDelete(sql = "UPDATE books SET is_deleted = true WHERE id = ?")
@@ -52,6 +50,8 @@ public class Book {
     @Column(nullable = false)
     private boolean isDeleted = false;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @ManyToMany
     @JoinTable(
             name = "books_categories",
@@ -60,6 +60,8 @@ public class Book {
     )
     private Set<Category> categories = new HashSet<>();
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "book", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<CartItem> cartItems = new HashSet<>();
 }

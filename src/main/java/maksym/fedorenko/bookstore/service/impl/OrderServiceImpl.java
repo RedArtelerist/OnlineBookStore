@@ -33,7 +33,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDto createOrder(Authentication authentication, CreateOrderRequestDto requestDto) {
         ShoppingCart cart = shoppingCartRepository
-                .findByUserEmailWithCartItems(authentication.getName())
+                .findByUserEmail(authentication.getName())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Can't create order because cart doesn't exist")
                 );

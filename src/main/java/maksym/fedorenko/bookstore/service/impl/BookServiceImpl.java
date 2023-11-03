@@ -1,8 +1,7 @@
 package maksym.fedorenko.bookstore.service.impl;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import maksym.fedorenko.bookstore.dto.book.BookDto;
@@ -13,13 +12,13 @@ import maksym.fedorenko.bookstore.dto.book.UpdateBookRequestDto;
 import maksym.fedorenko.bookstore.exception.EntityNotFoundException;
 import maksym.fedorenko.bookstore.mapper.BookMapper;
 import maksym.fedorenko.bookstore.model.Book;
-import maksym.fedorenko.bookstore.model.Category;
 import maksym.fedorenko.bookstore.model.QBook;
 import maksym.fedorenko.bookstore.repository.BookRepository;
 import maksym.fedorenko.bookstore.repository.CategoryRepository;
 import maksym.fedorenko.bookstore.service.BookService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -29,6 +28,7 @@ public class BookServiceImpl implements BookService {
     private final BookMapper bookMapper;
 
     @Override
+    @Transactional
     public BookDto save(CreateBookRequestDto requestDto) {
         Book book = bookMapper.toBook(requestDto);
         addBookCategories(requestDto.categoryIds(), book);
@@ -61,6 +61,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional
     public BookDto update(Long id, UpdateBookRequestDto requestDto) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Can't find book by id: " + id));
@@ -87,9 +88,10 @@ public class BookServiceImpl implements BookService {
     }
 
     private void addBookCategories(List<Long> categoryIds, Book book) {
-        Set<Category> categories = new HashSet<>(
-                categoryRepository.findAllById(categoryIds));
-        book.setCategories(categories);
+        book.setCategories(categoryIds.stream()
+                .map(categoryRepository::getReferenceById)
+                .collect(Collectors.toSet())
+        );
     }
 
     private void checkIfBookExistsById(Long id) {

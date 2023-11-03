@@ -8,7 +8,6 @@ import maksym.fedorenko.bookstore.dto.shoppingcart.UpdateCartItemRequestDto;
 import maksym.fedorenko.bookstore.exception.EntityNotFoundException;
 import maksym.fedorenko.bookstore.mapper.CartItemMapper;
 import maksym.fedorenko.bookstore.mapper.ShoppingCartMapper;
-import maksym.fedorenko.bookstore.model.Book;
 import maksym.fedorenko.bookstore.model.CartItem;
 import maksym.fedorenko.bookstore.model.ShoppingCart;
 import maksym.fedorenko.bookstore.repository.BookRepository;
@@ -17,6 +16,7 @@ import maksym.fedorenko.bookstore.repository.ShoppingCartRepository;
 import maksym.fedorenko.bookstore.service.ShoppingCartService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,17 +29,19 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public CartDto getUserCart(Authentication authentication) {
-        String username = authentication.getName();
-        ShoppingCart cart = shoppingCartRepository.findByUserEmailWithCartItems(username)
+        String email = authentication.getName();
+        ShoppingCart cart = shoppingCartRepository.findByUserEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Can't find cart for user with email: %s".formatted(username)
+                        "Can't find cart for user with email: %s".formatted(email)
                 ));
         return shoppingCartMapper.toDto(cart);
     }
 
     @Override
+    @Transactional
     public CartItemDto addCartItem(
             Authentication authentication, CreateCartItemRequestDto requestDto) {
+        checkIfBookExists(requestDto);
         String email = authentication.getName();
         ShoppingCart cart = shoppingCartRepository.findByUserEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -70,7 +72,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             CreateCartItemRequestDto requestDto, ShoppingCart cart) {
         CartItem cartItem = cartItemMapper.toCartItem(requestDto);
         cartItem.setShoppingCart(cart);
-        cartItem.setBook(getBookFromCartItem(requestDto));
+        cartItem.setBook(bookRepository.getReferenceById(requestDto.bookId()));
         return cartItem;
     }
 
@@ -81,11 +83,10 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 );
     }
 
-    private Book getBookFromCartItem(CreateCartItemRequestDto requestDto) {
+    private void checkIfBookExists(CreateCartItemRequestDto requestDto) {
         Long bookId = requestDto.bookId();
-        return bookRepository.findById(bookId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Can't find book by id: %d".formatted(bookId))
-                );
+        if (!bookRepository.existsById(bookId)) {
+            throw new EntityNotFoundException("Can't find book by id: %d".formatted(bookId));
+        }
     }
 }
