@@ -1,0 +1,10 @@
+databaseChangeLog:
+  -  changeSet:
+       id:  drop-is-deleted-column
+       author:  MaksymFedorenko
+       changes:
+         -  dropColumn:
+              columns:
+                -  column:
+                     name:  is_deleted
+              tableName:  shopping_carts
