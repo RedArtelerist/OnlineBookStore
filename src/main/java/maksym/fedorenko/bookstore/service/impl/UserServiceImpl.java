@@ -10,6 +10,7 @@ import maksym.fedorenko.bookstore.exception.RegistrationException;
 import maksym.fedorenko.bookstore.mapper.UserMapper;
 import maksym.fedorenko.bookstore.model.Role;
 import maksym.fedorenko.bookstore.model.RoleName;
+import maksym.fedorenko.bookstore.model.ShoppingCart;
 import maksym.fedorenko.bookstore.model.User;
 import maksym.fedorenko.bookstore.repository.RoleRepository;
 import maksym.fedorenko.bookstore.repository.UserRepository;
@@ -34,7 +35,14 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setRoles(getDefaultRoles());
+        createUserShoppingCart(user);
         return userMapper.toDto(userRepository.save(user));
+    }
+
+    private void createUserShoppingCart(User user) {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setUser(user);
+        user.setShoppingCart(shoppingCart);
     }
 
     private Set<Role> getDefaultRoles() {

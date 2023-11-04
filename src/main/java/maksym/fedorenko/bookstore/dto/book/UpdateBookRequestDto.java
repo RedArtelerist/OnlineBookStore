@@ -1,5 +1,6 @@
 package maksym.fedorenko.bookstore.dto.book;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
@@ -16,6 +17,6 @@ public record UpdateBookRequestDto(
         @Positive BigDecimal price,
         @Length(max = 1024) String description,
         @Length(max = 128) String coverImage,
-        List<Long> categoryIds) {
+        @NotNull List<@Positive Long> categoryIds) {
 
 }

@@ -15,3 +15,7 @@ bookstore:
 jwt:
   expiration: 1200000
   secret: fkaafa1r88)_402492fls;l2=040;fs'104jfjlf1804180
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha
+  writer-with-order-by-keys: true

@@ -11,6 +11,7 @@ import maksym.fedorenko.bookstore.dto.book.BookSearchParametersDto;
 import maksym.fedorenko.bookstore.dto.book.CreateBookRequestDto;
 import maksym.fedorenko.bookstore.dto.book.UpdateBookRequestDto;
 import maksym.fedorenko.bookstore.service.BookService;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -40,7 +41,7 @@ public class BookController {
     )
     @GetMapping
     @PreAuthorize("hasRole('USER')")
-    public List<BookDto> getAll(@PageableDefault(size = 20) Pageable pageable) {
+    public List<BookDto> getAll(@ParameterObject @PageableDefault Pageable pageable) {
         return bookService.findAll(pageable);
     }
 
@@ -103,7 +104,7 @@ public class BookController {
     @PreAuthorize("hasRole('USER')")
     public List<BookDto> searchBooks(
             @Valid BookSearchParametersDto searchParameters,
-            @PageableDefault(size = 20) Pageable pageable
+            @ParameterObject @PageableDefault Pageable pageable
     ) {
         return bookService.searchBooksByParameters(searchParameters, pageable);
     }
