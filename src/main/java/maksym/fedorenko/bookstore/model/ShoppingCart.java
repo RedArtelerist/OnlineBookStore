@@ -23,7 +23,7 @@ public class ShoppingCart {
     private Long id;
 
     @MapsId
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

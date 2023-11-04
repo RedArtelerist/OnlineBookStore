@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
+    Optional<CartItem> findByIdAndShoppingCartUserEmail(Long id, String email);
+
     @EntityGraph(attributePaths = "book")
     Optional<CartItem> findByShoppingCartAndBookId(ShoppingCart cart, Long bookId);
 }

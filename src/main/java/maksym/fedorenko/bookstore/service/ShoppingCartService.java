@@ -11,7 +11,9 @@ public interface ShoppingCartService {
 
     CartItemDto addCartItem(Authentication authentication, CreateCartItemRequestDto requestDto);
 
-    CartItemDto updateCartItem(Long id, UpdateCartItemRequestDto requestDto);
+    CartItemDto updateCartItem(
+            Authentication authentication, Long id, UpdateCartItemRequestDto requestDto
+    );
 
-    void deleteCartItem(Long id);
+    void deleteCartItem(Authentication authentication, Long id);
 }

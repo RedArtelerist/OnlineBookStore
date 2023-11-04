@@ -57,15 +57,18 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    public CartItemDto updateCartItem(Long id, UpdateCartItemRequestDto requestDto) {
-        CartItem cartItem = findCartItemById(id);
+    public CartItemDto updateCartItem(
+            Authentication authentication,
+            Long id,
+            UpdateCartItemRequestDto requestDto) {
+        CartItem cartItem = findCartItemByIdAndUser(authentication.getName(), id);
         cartItem.setQuantity(requestDto.quantity());
         return cartItemMapper.toDto(cartItemRepository.save(cartItem));
     }
 
     @Override
-    public void deleteCartItem(Long id) {
-        cartItemRepository.delete(findCartItemById(id));
+    public void deleteCartItem(Authentication authentication, Long id) {
+        cartItemRepository.delete(findCartItemByIdAndUser(authentication.getName(), id));
     }
 
     private CartItem createCartItem(
@@ -76,10 +79,11 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         return cartItem;
     }
 
-    private CartItem findCartItemById(Long id) {
-        return cartItemRepository.findById(id)
+    private CartItem findCartItemByIdAndUser(String email, Long id) {
+        return cartItemRepository.findByIdAndShoppingCartUserEmail(id, email)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Can't find cart item by id: %d".formatted(id))
+                        "Can't find cart item with id=%d in user's cart with email: %s"
+                                .formatted(id, email))
                 );
     }
 
