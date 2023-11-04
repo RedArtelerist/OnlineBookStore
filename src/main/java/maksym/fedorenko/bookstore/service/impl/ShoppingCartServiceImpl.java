@@ -57,6 +57,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
+    @Transactional
     public CartItemDto updateCartItem(
             Authentication authentication,
             Long id,
