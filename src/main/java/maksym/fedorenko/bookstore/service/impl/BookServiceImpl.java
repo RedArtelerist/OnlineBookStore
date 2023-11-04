@@ -1,5 +1,7 @@
 package maksym.fedorenko.bookstore.service.impl;
 
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -47,7 +49,7 @@ public class BookServiceImpl implements BookService {
             BookSearchParametersDto searchDto, Pageable pageable
     ) {
         return StreamSupport.stream(bookRepository
-                        .findAll(searchDto.getFilterPredicate(QBook.book), pageable)
+                        .findAll(getFilterPredicate(searchDto, QBook.book), pageable)
                         .spliterator(), false)
                 .map(bookMapper::toDto)
                 .toList();
@@ -98,5 +100,22 @@ public class BookServiceImpl implements BookService {
         if (!bookRepository.existsById(id)) {
             throw new EntityNotFoundException("Book with id=%d doesn't exist".formatted(id));
         }
+    }
+
+    private Predicate getFilterPredicate(BookSearchParametersDto searchDto, QBook book) {
+        BooleanExpression predicate = book.isNotNull();
+        if (searchDto.title() != null) {
+            predicate = predicate.and(book.title.containsIgnoreCase(searchDto.title()));
+        }
+        if (searchDto.author() != null && searchDto.author().length > 0) {
+            predicate = predicate.and(book.author.in(searchDto.author()));
+        }
+        if (searchDto.minPrice() != null) {
+            predicate = predicate.and(book.price.goe(searchDto.minPrice()));
+        }
+        if (searchDto.maxPrice() != null) {
+            predicate = predicate.and(book.price.loe(searchDto.maxPrice()));
+        }
+        return predicate;
     }
 }
