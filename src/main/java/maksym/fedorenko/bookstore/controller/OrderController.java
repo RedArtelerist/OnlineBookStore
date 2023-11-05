@@ -80,7 +80,7 @@ public class OrderController {
             Authentication authentication,
             @PathVariable @Positive Long orderId,
             @PathVariable @Positive Long id) {
-        return orderService.getOrderItemById(authentication, id);
+        return orderService.getOrderItemById(authentication, orderId, id);
     }
 
     @Operation(

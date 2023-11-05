@@ -65,11 +65,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderItemDto getOrderItemById(Authentication authentication, Long id) {
+    public OrderItemDto getOrderItemById(Authentication authentication, Long orderId, Long id) {
         OrderItem orderItem = orderItemRepository
-                .findByIdAndOrderUserEmail(id, authentication.getName())
+                .findByIdAndOrderAndUser(id, orderId, authentication.getName())
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "You don't have an order item with id=%d".formatted(id))
+                        "Item with id %d not found in order with id %d".formatted(id, orderId))
                 );
         return orderItemMapper.toDto(orderItem);
     }
