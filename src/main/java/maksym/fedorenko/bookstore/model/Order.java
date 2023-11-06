@@ -59,4 +59,14 @@ public class Order {
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
+
+    public enum Status {
+        NEW,
+        PREPARING,
+        PENDING,
+        ON_THE_WAY,
+        DELIVERED,
+        COMPLETED,
+        CANCELED
+    }
 }

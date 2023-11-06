@@ -40,8 +40,7 @@ public class OrderServiceImpl implements OrderService {
         if (cart.getCartItems().size() == 0) {
             throw new CreateOrderException("Can't create order from empty cart");
         }
-        Order order = orderMapper.toOrder(cart);
-        order.setShippingAddress(requestDto.shippingAddress());
+        Order order = orderMapper.toOrder(cart, requestDto);
         cart.clear();
         shoppingCartRepository.save(cart);
         return orderMapper.toDto(orderRepository.save(order));

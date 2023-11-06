@@ -9,7 +9,6 @@ import maksym.fedorenko.bookstore.dto.user.UserResponseDto;
 import maksym.fedorenko.bookstore.exception.RegistrationException;
 import maksym.fedorenko.bookstore.mapper.UserMapper;
 import maksym.fedorenko.bookstore.model.Role;
-import maksym.fedorenko.bookstore.model.RoleName;
 import maksym.fedorenko.bookstore.model.ShoppingCart;
 import maksym.fedorenko.bookstore.model.User;
 import maksym.fedorenko.bookstore.repository.RoleRepository;
@@ -47,7 +46,7 @@ public class UserServiceImpl implements UserService {
 
     private Set<Role> getDefaultRoles() {
         return new HashSet<>(Collections.singletonList(
-                repository.findByName(RoleName.USER)
+                repository.findByName(Role.RoleName.USER)
         ));
     }
 }

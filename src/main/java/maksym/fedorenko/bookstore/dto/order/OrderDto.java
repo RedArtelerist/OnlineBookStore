@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import maksym.fedorenko.bookstore.model.Status;
+import maksym.fedorenko.bookstore.model.Order;
 
 public record OrderDto(
         Long id,
@@ -13,5 +13,5 @@ public record OrderDto(
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
         LocalDateTime orderDate,
         BigDecimal total,
-        Status status) {
+        Order.Status status) {
 }

@@ -1,6 +1,7 @@
 package maksym.fedorenko.bookstore.mapper;
 
 import java.math.BigDecimal;
+import maksym.fedorenko.bookstore.dto.order.CreateOrderRequestDto;
 import maksym.fedorenko.bookstore.dto.order.OrderDto;
 import maksym.fedorenko.bookstore.model.Order;
 import maksym.fedorenko.bookstore.model.OrderItem;
@@ -23,8 +24,8 @@ public interface OrderMapper {
     OrderDto toDto(Order order);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "orderItems", source = "cartItems")
-    Order toOrder(ShoppingCart cart);
+    @Mapping(target = "orderItems", source = "cart.cartItems")
+    Order toOrder(ShoppingCart cart, CreateOrderRequestDto requestDto);
 
     @AfterMapping
     default void setOrderToItems(@MappingTarget Order order) {
