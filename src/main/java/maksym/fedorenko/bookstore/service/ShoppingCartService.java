@@ -1,7 +1,6 @@
 package maksym.fedorenko.bookstore.service;
 
 import maksym.fedorenko.bookstore.dto.shoppingcart.CartDto;
-import maksym.fedorenko.bookstore.dto.shoppingcart.CartItemDto;
 import maksym.fedorenko.bookstore.dto.shoppingcart.CreateCartItemRequestDto;
 import maksym.fedorenko.bookstore.dto.shoppingcart.UpdateCartItemRequestDto;
 import org.springframework.security.core.Authentication;
@@ -9,11 +8,11 @@ import org.springframework.security.core.Authentication;
 public interface ShoppingCartService {
     CartDto getUserCart(Authentication authentication);
 
-    CartItemDto addCartItem(Authentication authentication, CreateCartItemRequestDto requestDto);
+    CartDto addCartItem(Authentication authentication, CreateCartItemRequestDto requestDto);
 
-    CartItemDto updateCartItem(
+    CartDto updateCartItem(
             Authentication authentication, Long id, UpdateCartItemRequestDto requestDto
     );
 
-    void deleteCartItem(Authentication authentication, Long id);
+    CartDto deleteCartItem(Authentication authentication, Long id);
 }

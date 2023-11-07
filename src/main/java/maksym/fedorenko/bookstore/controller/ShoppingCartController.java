@@ -6,11 +6,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import maksym.fedorenko.bookstore.dto.shoppingcart.CartDto;
-import maksym.fedorenko.bookstore.dto.shoppingcart.CartItemDto;
 import maksym.fedorenko.bookstore.dto.shoppingcart.CreateCartItemRequestDto;
 import maksym.fedorenko.bookstore.dto.shoppingcart.UpdateCartItemRequestDto;
 import maksym.fedorenko.bookstore.service.ShoppingCartService;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -48,7 +45,7 @@ public class ShoppingCartController {
     )
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    public CartItemDto addCartItem(
+    public CartDto addCartItem(
             Authentication authentication,
             @Valid @RequestBody CreateCartItemRequestDto requestDto) {
         return shoppingCartService.addCartItem(authentication, requestDto);
@@ -60,7 +57,7 @@ public class ShoppingCartController {
     )
     @PutMapping("/cart-items/{cartItemId}")
     @PreAuthorize("hasRole('USER')")
-    public CartItemDto updateCartItem(
+    public CartDto updateCartItem(
             Authentication authentication,
             @Positive @PathVariable Long cartItemId,
             @Valid @RequestBody UpdateCartItemRequestDto requestDto) {
@@ -73,10 +70,9 @@ public class ShoppingCartController {
     )
     @DeleteMapping("/cart-items/{cartItemId}")
     @PreAuthorize("hasRole('USER')")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCartItem(
+    public CartDto deleteCartItem(
             Authentication authentication,
             @Positive @PathVariable Long cartItemId) {
-        shoppingCartService.deleteCartItem(authentication, cartItemId);
+        return shoppingCartService.deleteCartItem(authentication, cartItemId);
     }
 }

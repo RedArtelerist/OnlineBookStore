@@ -9,8 +9,8 @@ import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -32,7 +32,17 @@ public class ShoppingCart {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "shoppingCart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<CartItem> cartItems = new HashSet<>();
+    private List<CartItem> cartItems = new ArrayList<>();
+
+    public void addCartItem(CartItem cartItem) {
+        cartItems.add(cartItem);
+        cartItem.setShoppingCart(this);
+    }
+
+    public void removeCartItem(CartItem cartItem) {
+        cartItems.remove(cartItem);
+        cartItem.setShoppingCart(null);
+    }
 
     public void clear() {
         cartItems.clear();
