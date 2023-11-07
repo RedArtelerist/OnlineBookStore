@@ -20,6 +20,7 @@ import maksym.fedorenko.bookstore.service.OrderService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,18 +32,18 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemMapper orderItemMapper;
 
     @Override
+    @Transactional
     public OrderDto createOrder(Authentication authentication, CreateOrderRequestDto requestDto) {
         ShoppingCart cart = shoppingCartRepository
                 .findByUserEmail(authentication.getName())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Can't create order because cart doesn't exist")
                 );
-        if (cart.getCartItems().size() == 0) {
+        if (cart.size() == 0) {
             throw new CreateOrderException("Can't create order from empty cart");
         }
         Order order = orderMapper.toOrder(cart, requestDto);
         cart.clear();
-        shoppingCartRepository.save(cart);
         return orderMapper.toDto(orderRepository.save(order));
     }
 

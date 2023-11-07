@@ -45,6 +45,11 @@ public class ShoppingCart {
     }
 
     public void clear() {
+        cartItems.forEach(item -> item.setShoppingCart(null));
         cartItems.clear();
+    }
+
+    public int size() {
+        return cartItems.size();
     }
 }

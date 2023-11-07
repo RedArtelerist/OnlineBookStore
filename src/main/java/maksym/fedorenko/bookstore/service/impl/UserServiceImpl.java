@@ -1,7 +1,7 @@
 package maksym.fedorenko.bookstore.service.impl;
 
-import java.util.Collections;
-import java.util.HashSet;
+import static maksym.fedorenko.bookstore.model.Role.RoleName.USER;
+
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import maksym.fedorenko.bookstore.dto.user.UserRegistrationRequestDto;
@@ -45,8 +45,6 @@ public class UserServiceImpl implements UserService {
     }
 
     private Set<Role> getDefaultRoles() {
-        return new HashSet<>(Collections.singletonList(
-                repository.findByName(Role.RoleName.USER)
-        ));
+        return Set.of(repository.findByName(USER));
     }
 }

@@ -1,7 +1,8 @@
 package maksym.fedorenko.bookstore.dto.order;
 
-import jakarta.validation.constraints.NotNull;
-import maksym.fedorenko.bookstore.model.Order;
+import static maksym.fedorenko.bookstore.model.Order.Status;
 
-public record UpdateOrderRequestDto(@NotNull Order.Status status) {
+import jakarta.validation.constraints.NotNull;
+
+public record UpdateOrderRequestDto(@NotNull Status status) {
 }
