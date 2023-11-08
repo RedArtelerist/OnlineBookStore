@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/book_store?serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/${MYSQLDB_DATABASE}?serverTimezone=UTC
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: 611001
+    username: ${MYSQLDB_USER}
+    password: ${MYSQLDB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: validate
@@ -13,8 +13,8 @@ bookstore:
   openapi:
     dev-url: http://localhost:8080
 jwt:
-  expiration: 1200000
-  secret: fkaafa1r88)_402492fls;l2=040;fs'104jfjlf1804180
+  expiration: ${JWT_EXPIRATION}
+  secret: ${JWT_SECRET}
 springdoc:
   swagger-ui:
     tags-sorter: alpha
