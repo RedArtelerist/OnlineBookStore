@@ -1,7 +1,7 @@
 package maksym.fedorenko.bookstore.service.impl;
 
-import java.util.Collections;
-import java.util.HashSet;
+import static maksym.fedorenko.bookstore.model.Role.RoleName.USER;
+
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import maksym.fedorenko.bookstore.dto.user.UserRegistrationRequestDto;
@@ -9,7 +9,6 @@ import maksym.fedorenko.bookstore.dto.user.UserResponseDto;
 import maksym.fedorenko.bookstore.exception.RegistrationException;
 import maksym.fedorenko.bookstore.mapper.UserMapper;
 import maksym.fedorenko.bookstore.model.Role;
-import maksym.fedorenko.bookstore.model.RoleName;
 import maksym.fedorenko.bookstore.model.ShoppingCart;
 import maksym.fedorenko.bookstore.model.User;
 import maksym.fedorenko.bookstore.repository.RoleRepository;
@@ -29,7 +28,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto register(UserRegistrationRequestDto request)
             throws RegistrationException {
-        if (userRepository.findByEmail(request.email()).isPresent()) {
+        if (userRepository.existsByEmail(request.email())) {
             throw new RegistrationException("Registration was failed");
         }
         User user = userMapper.toUser(request);
@@ -46,8 +45,6 @@ public class UserServiceImpl implements UserService {
     }
 
     private Set<Role> getDefaultRoles() {
-        return new HashSet<>(Collections.singletonList(
-                repository.findByName(RoleName.USER)
-        ));
+        return Set.of(repository.findByName(USER));
     }
 }
