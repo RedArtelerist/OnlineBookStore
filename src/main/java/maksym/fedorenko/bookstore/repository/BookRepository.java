@@ -22,5 +22,5 @@ public interface BookRepository extends JpaRepository<Book, Long>, QuerydslPredi
     @EntityGraph(attributePaths = "categories")
     Page<Book> findAll(Predicate predicate, Pageable pageable);
 
-    List<Book> findAllByCategoriesId(Long id, Pageable pageable);
+    Page<Book> findAllByCategoriesId(Long id, Pageable pageable);
 }
