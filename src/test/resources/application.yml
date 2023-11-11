@@ -3,6 +3,11 @@ spring:
     url: jdbc:tc:mysql:8:///test_book_store_db
     username: test
     password: test
+  jpa:
+    show-sql: true
+bookstore:
+  openapi:
+    dev-url: http://localhost:8080
 jwt:
-  expiration: ${JWT_EXPIRATION}
-  secret: ${JWT_SECRET}
+  expiration: 1200000
+  secret: 83189akflkafl89afklkfalka81419==1-jkfa

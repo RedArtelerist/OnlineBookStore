@@ -33,7 +33,7 @@ class BookRepositoryTest {
     @SneakyThrows
     static void beforeAll(@Autowired DataSource dataSource) {
         tearDown(dataSource);
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
                     connection,
@@ -53,7 +53,7 @@ class BookRepositoryTest {
 
     @SneakyThrows
     static void tearDown(DataSource dataSource) {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
                     connection,

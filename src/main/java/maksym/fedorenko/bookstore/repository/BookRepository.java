@@ -1,7 +1,6 @@
 package maksym.fedorenko.bookstore.repository;
 
 import com.querydsl.core.types.Predicate;
-import java.util.List;
 import java.util.Optional;
 import maksym.fedorenko.bookstore.model.Book;
 import org.springframework.data.domain.Page;
