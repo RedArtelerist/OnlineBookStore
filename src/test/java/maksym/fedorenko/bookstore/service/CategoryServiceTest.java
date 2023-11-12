@@ -60,12 +60,9 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("Find category by ivalid id")
+    @DisplayName("Find category by invalid id")
     void getById_WithInvalidId_ShouldThrowException() {
         Long id = -1L;
-        Category category = new Category();
-        category.setId(id);
-        category.setName("Programming");
 
         when(categoryRepository.findById(id)).thenReturn(Optional.empty());
 
