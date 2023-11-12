@@ -9,5 +9,5 @@ bookstore:
   openapi:
     dev-url: http://localhost:8080
 jwt:
-  expiration: 1200000
-  secret: ${{ secrets.JWT_SECRET }}
+  expiration: ${JWT_EXPIRATION:600000}
+  secret: ${JWT_SECRET:somesecretkey-10-=1=falkaflk91900913fkjaf19080}
