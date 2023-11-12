@@ -1,6 +1,7 @@
 package maksym.fedorenko.bookstore.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import maksym.fedorenko.bookstore.dto.category.CategoryDto;
 import maksym.fedorenko.bookstore.dto.category.CreateCategoryRequestDto;
@@ -34,7 +35,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto getById(Long id) {
-        return categoryRepository.findById(id)
+        Optional<Category> categoryOptional = categoryRepository.findById(id);
+        return categoryOptional
                 .map(categoryMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Can't find category by id: " + id
