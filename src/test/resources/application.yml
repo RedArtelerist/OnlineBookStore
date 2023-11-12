@@ -10,4 +10,4 @@ bookstore:
     dev-url: http://localhost:8080
 jwt:
   expiration: 1200000
-  secret: 83189akflkafl89afklkfalka81419==1-jkfa
+  secret: ${{ secrets.JWT_SECRET }}
