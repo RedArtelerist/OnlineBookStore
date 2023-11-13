@@ -1,7 +1,6 @@
 package maksym.fedorenko.bookstore.service.impl;
 
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import maksym.fedorenko.bookstore.dto.category.CategoryDto;
 import maksym.fedorenko.bookstore.dto.category.CreateCategoryRequestDto;
