@@ -75,7 +75,6 @@ public class BookController {
                     If you want update book categories then provide a list of IDs"""
     )
     @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
     @PreAuthorize("hasRole('ADMIN')")
     public BookDto updateBook(
             @PathVariable @Positive Long id, @RequestBody @Valid UpdateBookRequestDto bookDto

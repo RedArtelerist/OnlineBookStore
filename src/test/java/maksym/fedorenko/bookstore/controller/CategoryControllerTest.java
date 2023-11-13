@@ -24,7 +24,7 @@ import maksym.fedorenko.bookstore.dto.category.CreateCategoryRequestDto;
 import maksym.fedorenko.bookstore.dto.category.UpdateCategoryRequestDto;
 import maksym.fedorenko.bookstore.exception.ErrorResponseWrapper;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,37 +47,22 @@ class CategoryControllerTest {
 
     @BeforeAll
     @SneakyThrows
-    static void beforeAll(
-            @Autowired WebApplicationContext applicationContext,
-            @Autowired DataSource dataSource) {
+    static void beforeAll(@Autowired WebApplicationContext applicationContext) {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(applicationContext)
                 .apply(springSecurity())
                 .build();
         objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-
-        tearDown(dataSource);
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setAutoCommit(true);
-            ScriptUtils.executeSqlScript(
-                    connection,
-                    new ClassPathResource("database/categories/add-default-categories.sql")
-            );
-        }
     }
 
-    @AfterAll
-    static void afterAll(@Autowired DataSource dataSource) {
-        tearDown(dataSource);
-    }
-
+    @AfterEach
     @SneakyThrows
-    static void tearDown(DataSource dataSource) {
+    void tearDown(@Autowired DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
                     connection,
-                    new ClassPathResource("database/categories/delete-default-categories.sql")
+                    new ClassPathResource("database/categories/delete-all-categories.sql")
             );
         }
     }
@@ -85,10 +70,6 @@ class CategoryControllerTest {
     @Test
     @DisplayName("Create valid category")
     @WithMockUser(username = "admin", roles = {"USER", "ADMIN"})
-    @Sql(
-            scripts = "classpath:database/categories/delete-test-category.sql",
-            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
-    )
     void createCategory_ValidRequestDto_Success() throws Exception {
         CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto(
                 "Test",
@@ -136,6 +117,10 @@ class CategoryControllerTest {
     @Test
     @DisplayName("Find all categories")
     @WithMockUser(username = "user", roles = "USER")
+    @Sql(
+            scripts = "classpath:database/categories/add-default-categories.sql",
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
     void getAll_GivenCategoriesInCatalog_Success() throws Exception {
         List<CategoryDto> expected = List.of(
                 new CategoryDto(1L, "education", null),
@@ -160,6 +145,10 @@ class CategoryControllerTest {
     @Test
     @DisplayName("Find category by existent id")
     @WithMockUser(username = "user", roles = "USER")
+    @Sql(
+            scripts = "classpath:database/categories/add-one-category.sql",
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
     void getById_WithExistentId_Success() throws Exception {
         Long id = 1L;
         CategoryDto expected = new CategoryDto(id, "education", null);
@@ -211,19 +200,15 @@ class CategoryControllerTest {
     @DisplayName("Update existent category with valid request")
     @WithMockUser(username = "admin", roles = {"USER", "ADMIN"})
     @Sql(
-            scripts = "classpath:database/categories/add-category-for-update-or-delete.sql",
+            scripts = "classpath:database/categories/add-one-category.sql",
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
-    @Sql(
-            scripts = "classpath:database/categories/delete-updated-category.sql",
-            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
-    )
     void updateCategory_ValidRequestDtoAndExistentId_Success() throws Exception {
-        Long id = 4L;
+        Long id = 1L;
         UpdateCategoryRequestDto requestDto = new UpdateCategoryRequestDto(
                 "detective", "description");
 
-        CategoryDto expected = new CategoryDto(4L, "detective", "description");
+        CategoryDto expected = new CategoryDto(id, "detective", "description");
 
         MvcResult result = mockMvc.perform(put("/api/categories/" + id)
                         .content(objectMapper.writeValueAsString(requestDto))
@@ -243,15 +228,11 @@ class CategoryControllerTest {
     @DisplayName("Delete category by existent id")
     @WithMockUser(username = "admin", roles = {"USER", "ADMIN"})
     @Sql(
-            scripts = "classpath:database/categories/add-category-for-update-or-delete.sql",
+            scripts = "classpath:database/categories/add-one-category.sql",
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
-    @Sql(
-            scripts = "classpath:database/categories/delete-updated-category.sql",
-            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
-    )
     void deleteCategory_WithExistentId_Success() throws Exception {
-        Long id = 4L;
+        Long id = 1L;
         mockMvc.perform(delete("/api/categories/" + id)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent())
@@ -262,15 +243,18 @@ class CategoryControllerTest {
     @DisplayName("Find books by existent category id")
     @WithMockUser(username = "user", roles = "USER")
     @Sql(
-            scripts = "classpath:database/books/add-default-books.sql",
+            scripts = {
+                    "classpath:database/categories/add-default-categories.sql",
+                    "classpath:database/books/add-default-books.sql"
+            },
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(
-            scripts = "classpath:database/books/delete-default-books.sql",
+            scripts = "classpath:database/books/delete-all-books.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     void getBooksByCategoryId_WithExistentId_Success() throws Exception {
-        Long id = 1L;
+        Long bookId = 1L;
         List<BookDtoWithoutCategories> expected = List.of(
                 new BookDtoWithoutCategories(
                         1L, "Effective Java", "Joshua Bloch", "1234567890",
@@ -286,7 +270,7 @@ class CategoryControllerTest {
                 )
         );
 
-        MvcResult result = mockMvc.perform(get("/api/categories/" + id + "/books")
+        MvcResult result = mockMvc.perform(get("/api/categories/" + bookId + "/books")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();

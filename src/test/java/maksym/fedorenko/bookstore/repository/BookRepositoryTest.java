@@ -57,11 +57,11 @@ class BookRepositoryTest {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
                     connection,
-                    new ClassPathResource("database/books/delete-default-books.sql")
+                    new ClassPathResource("database/books/delete-all-books.sql")
             );
             ScriptUtils.executeSqlScript(
                     connection,
-                    new ClassPathResource("database/categories/delete-default-categories.sql")
+                    new ClassPathResource("database/categories/delete-all-categories.sql")
             );
         }
     }
