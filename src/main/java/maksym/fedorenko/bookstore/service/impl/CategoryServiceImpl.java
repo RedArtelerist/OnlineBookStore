@@ -35,8 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto getById(Long id) {
-        Optional<Category> categoryOptional = categoryRepository.findById(id);
-        return categoryOptional
+        return categoryRepository.findById(id)
                 .map(categoryMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Can't find category by id: " + id
