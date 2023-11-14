@@ -1,6 +1,4 @@
 spring:
-  config:
-    import: optional:file:.env[.properties]
   datasource:
     url: jdbc:tc:mysql:8:///test_book_store_db
     username: test
@@ -11,5 +9,5 @@ bookstore:
   openapi:
     dev-url: http://localhost:8080
 jwt:
-  expiration: ${JWT_EXPIRATION}
-  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:600000}
+  secret: ${JWT_SECRET:somesecretkey-10-=1=falkaflk91900913fkjaf19080}

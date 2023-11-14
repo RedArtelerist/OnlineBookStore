@@ -1,6 +1,4 @@
 spring:
-  config:
-    import: optional:file:.env[.properties]
   datasource:
     url: jdbc:mysql://localhost:3306/${MYSQLDB_DATABASE}?serverTimezone=UTC
     driver-class-name: com.mysql.cj.jdbc.Driver
