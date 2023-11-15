@@ -1,8 +1,6 @@
 package maksym.fedorenko.bookstore.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -21,7 +19,6 @@ import maksym.fedorenko.bookstore.dto.category.CategoryDto;
 import maksym.fedorenko.bookstore.dto.category.CreateCategoryRequestDto;
 import maksym.fedorenko.bookstore.dto.category.UpdateCategoryRequestDto;
 import maksym.fedorenko.bookstore.exception.ErrorResponseWrapper;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,8 +61,6 @@ class CategoryControllerTest {
                 null
         );
 
-        CategoryDto expected = new CategoryDto(null, "Test", null);
-
         MvcResult result = mockMvc.perform(post("/api/categories")
                         .content(objectMapper.writeValueAsString(requestDto))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -77,9 +72,10 @@ class CategoryControllerTest {
                 CategoryDto.class
         );
 
-        assertNotNull(actual);
-        assertNotNull(actual.id());
-        assertTrue(EqualsBuilder.reflectionEquals(expected, actual, "id"));
+        assertThat(actual).isNotNull()
+                .hasFieldOrPropertyWithValue("name", "Test")
+                .hasFieldOrPropertyWithValue("description", null)
+                .extracting("id").isNotNull();
     }
 
     @Test
@@ -95,51 +91,49 @@ class CategoryControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        String expected = "Request input parameters are missing or invalid";
         ErrorResponseWrapper error = objectMapper.readValue(
                 result.getResponse().getContentAsString(), ErrorResponseWrapper.class
         );
-        assertEquals(expected, error.details());
+
+        assertThat(error.details()).isEqualTo("Request input parameters are missing or invalid");
     }
 
     @Test
     @DisplayName("Find all categories")
     @WithMockUser(username = "user", roles = "USER")
-    @Sql(
-            scripts = "classpath:database/categories/add-default-categories.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
+    @Sql(scripts = "classpath:database/categories/add-default-categories.sql")
     void getAll_GivenCategoriesInCatalog_Success() throws Exception {
-        List<CategoryDto> expected = List.of(
-                new CategoryDto(1L, "education", null),
-                new CategoryDto(2L, "programming", null),
-                new CategoryDto(3L, "technologies", null)
-        );
-        
         MvcResult result = mockMvc.perform(get("/api/categories")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        CategoryDto[] actual = objectMapper.readValue(
+        List<CategoryDto> actual = Arrays.stream(objectMapper.readValue(
                 result.getResponse().getContentAsString(),
                 CategoryDto[].class
-        );
+        )).toList();
 
-        assertEquals(3, actual.length);
-        assertEquals(expected, Arrays.stream(actual).toList());
+        assertThat(actual)
+                .hasSize(3)
+                .element(0)
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .hasFieldOrPropertyWithValue("name", "education");
+        assertThat(actual)
+                .element(1)
+                .hasFieldOrPropertyWithValue("id", 2L)
+                .hasFieldOrPropertyWithValue("name", "programming");
+        assertThat(actual)
+                .element(2)
+                .hasFieldOrPropertyWithValue("id", 3L)
+                .hasFieldOrPropertyWithValue("name", "technologies");
     }
 
     @Test
     @DisplayName("Find category by existent id")
     @WithMockUser(username = "user", roles = "USER")
-    @Sql(
-            scripts = "classpath:database/categories/add-one-category.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
+    @Sql(scripts = "classpath:database/categories/add-one-category.sql")
     void getById_WithExistentId_Success() throws Exception {
         Long id = 1L;
-        CategoryDto expected = new CategoryDto(id, "education", null);
 
         MvcResult result = mockMvc.perform(get("/api/categories/" + id)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -151,7 +145,10 @@ class CategoryControllerTest {
                 CategoryDto.class
         );
 
-        assertEquals(expected, actual);
+        assertThat(actual)
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .hasFieldOrPropertyWithValue("name", "education")
+                .hasFieldOrPropertyWithValue("description", null);
     }
 
     @Test
@@ -177,26 +174,20 @@ class CategoryControllerTest {
                 .andExpect(status().isNotFound())
                 .andReturn();
 
-        String expected = "Can't find category by id: " + id;
         ErrorResponseWrapper error = objectMapper.readValue(
                 result.getResponse().getContentAsString(), ErrorResponseWrapper.class
         );
-        assertEquals(expected, error.details());
+        assertThat(error.details()).isEqualTo("Can't find category by id: " + id);
     }
 
     @Test
     @DisplayName("Update existent category with valid request")
     @WithMockUser(username = "admin", roles = {"USER", "ADMIN"})
-    @Sql(
-            scripts = "classpath:database/categories/add-one-category.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
+    @Sql(scripts = "classpath:database/categories/add-one-category.sql")
     void updateCategory_ValidRequestDtoAndExistentId_Success() throws Exception {
         Long id = 1L;
         UpdateCategoryRequestDto requestDto = new UpdateCategoryRequestDto(
                 "detective", "description");
-
-        CategoryDto expected = new CategoryDto(id, "detective", "description");
 
         MvcResult result = mockMvc.perform(put("/api/categories/" + id)
                         .content(objectMapper.writeValueAsString(requestDto))
@@ -209,16 +200,15 @@ class CategoryControllerTest {
                 CategoryDto.class
         );
 
-        assertEquals(expected, actual);
+        assertThat(actual).hasFieldOrPropertyWithValue("id", 1L)
+                .hasFieldOrPropertyWithValue("name", "detective")
+                .hasFieldOrPropertyWithValue("description", "description");
     }
 
     @Test
     @DisplayName("Delete category by existent id")
     @WithMockUser(username = "admin", roles = {"USER", "ADMIN"})
-    @Sql(
-            scripts = "classpath:database/categories/add-one-category.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
+    @Sql(scripts = "classpath:database/categories/add-one-category.sql")
     void deleteCategory_WithExistentId_Success() throws Exception {
         Long id = 1L;
         mockMvc.perform(delete("/api/categories/" + id)
@@ -230,45 +220,48 @@ class CategoryControllerTest {
     @Test
     @DisplayName("Find books by existent category id")
     @WithMockUser(username = "user", roles = "USER")
-    @Sql(
-            scripts = {
-                    "classpath:database/categories/add-default-categories.sql",
-                    "classpath:database/books/add-default-books.sql"
-            },
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
-    @Sql(
-            scripts = "classpath:database/books/delete-all-books.sql",
+    @Sql(scripts = {
+            "classpath:database/categories/add-default-categories.sql",
+            "classpath:database/books/add-default-books.sql"
+    })
+    @Sql(scripts = "classpath:database/books/delete-all-books.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     void getBooksByCategoryId_WithExistentId_Success() throws Exception {
         Long bookId = 1L;
-        List<BookDtoWithoutCategories> expected = List.of(
-                new BookDtoWithoutCategories(
-                        1L, "Effective Java", "Joshua Bloch", "1234567890",
-                        new BigDecimal("12.99"), null, null
-                ),
-                new BookDtoWithoutCategories(
-                        2L, "Clean Code", "Robert Martin", "1234567891",
-                        new BigDecimal("45.99"), null, null
-                ),
-                new BookDtoWithoutCategories(
-                        5L, "Java in a Nutshell", "Benjamin Evans", "1234567894",
-                        new BigDecimal("19.99"), null, null
-                )
-        );
 
         MvcResult result = mockMvc.perform(get("/api/categories/" + bookId + "/books")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        BookDtoWithoutCategories[] actual = objectMapper.readValue(
+        var actual = Arrays.stream(objectMapper.readValue(
                 result.getResponse().getContentAsString(),
                 BookDtoWithoutCategories[].class
-        );
+        )).toList();
 
-        assertEquals(3, actual.length);
-        assertEquals(expected, Arrays.stream(actual).toList());
+        assertThat(actual).hasSize(3)
+                .element(0)
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .hasFieldOrPropertyWithValue("title", "Effective Java")
+                .hasFieldOrPropertyWithValue("author", "Joshua Bloch")
+                .hasFieldOrPropertyWithValue("isbn", "1234567890")
+                .hasFieldOrPropertyWithValue("price", BigDecimal.valueOf(12.99));
+
+        assertThat(actual)
+                .element(1)
+                .hasFieldOrPropertyWithValue("id", 2L)
+                .hasFieldOrPropertyWithValue("title", "Clean Code")
+                .hasFieldOrPropertyWithValue("author", "Robert Martin")
+                .hasFieldOrPropertyWithValue("isbn", "1234567891")
+                .hasFieldOrPropertyWithValue("price", BigDecimal.valueOf(45.99));
+
+        assertThat(actual)
+                .element(2)
+                .hasFieldOrPropertyWithValue("id", 5L)
+                .hasFieldOrPropertyWithValue("title", "Java in a Nutshell")
+                .hasFieldOrPropertyWithValue("author", "Benjamin Evans")
+                .hasFieldOrPropertyWithValue("isbn", "1234567894")
+                .hasFieldOrPropertyWithValue("price", BigDecimal.valueOf(19.99));
     }
 }

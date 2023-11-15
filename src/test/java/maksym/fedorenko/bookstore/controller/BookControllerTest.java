@@ -95,7 +95,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("Create book without categories")
     @WithMockUser(username = "user", roles = {"USER", "ADMIN"})
-    void createCategory_InvalidRequestDtoWithoutCategories_BadRequest() throws Exception {
+    void createBook_InvalidRequestDtoWithoutCategories_BadRequest() throws Exception {
         CreateBookRequestDto requestDto = new CreateBookRequestDto(
                 "Harry Potter",
                 "J. K. Rowling",
