@@ -1,7 +1,6 @@
 package maksym.fedorenko.bookstore.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,13 +10,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.util.Collections;
 import lombok.SneakyThrows;
 import maksym.fedorenko.bookstore.dto.shoppingcart.CartDto;
 import maksym.fedorenko.bookstore.dto.shoppingcart.CartItemDto;
 import maksym.fedorenko.bookstore.dto.shoppingcart.CreateCartItemRequestDto;
 import maksym.fedorenko.bookstore.dto.shoppingcart.UpdateCartItemRequestDto;
 import maksym.fedorenko.bookstore.exception.ErrorResponseWrapper;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,18 +53,11 @@ public class ShoppingCartControllerTest {
         objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     }
 
-
     @Test
     @DisplayName("Get shopping cart by existing user")
     @WithMockUser(username = "user@gmail.com", roles = "USER")
     @Sql(scripts = "classpath:database/shopping_cart/add-one-item.sql")
     public void getUserCart_WithExistingUser_Success() throws Exception {
-        CartDto expected = new CartDto(1L,
-                Collections.singletonList(
-                        new CartItemDto(1L, 1L, "Effective Java", 1)
-                )
-        );
-
         MvcResult result = mockMvc.perform(get("/api/cart")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -76,10 +68,16 @@ public class ShoppingCartControllerTest {
                 CartDto.class
         );
 
-        // @TODO use AssertJS
-
-        assertEquals(1L, actual.cartItems().size());
-        assertEquals(expected, actual);
+        assertThat(actual)
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .extracting(CartDto::cartItems)
+                .asInstanceOf(InstanceOfAssertFactories.list(CartItemDto.class))
+                .hasSize(1)
+                .element(0)
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .hasFieldOrPropertyWithValue("bookId", 1L)
+                .hasFieldOrPropertyWithValue("bookTitle", "Effective Java")
+                .hasFieldOrPropertyWithValue("quantity", 1);
     }
 
     @Test
@@ -92,12 +90,11 @@ public class ShoppingCartControllerTest {
                 .andExpect(status().isNotFound())
                 .andReturn();
 
-        String expected = "Can't find cart for user with email";
         ErrorResponseWrapper error = objectMapper.readValue(
                 result.getResponse().getContentAsString(), ErrorResponseWrapper.class
         );
 
-        assertTrue(error.details().startsWith(expected));
+        assertThat(error.details()).startsWith("Can't find cart for user with email");
     }
 
     @Test
@@ -108,10 +105,6 @@ public class ShoppingCartControllerTest {
         Long bookId = 1L;
         CreateCartItemRequestDto requestDto = new CreateCartItemRequestDto(
                 bookId, 2
-        );
-
-        CartDto expected = new CartDto(1L, Collections.singletonList(
-                new CartItemDto(1L, bookId, "Effective Java", requestDto.quantity()))
         );
 
         MvcResult result = mockMvc.perform(post("/api/cart")
@@ -125,7 +118,16 @@ public class ShoppingCartControllerTest {
                 CartDto.class
         );
 
-        assertEquals(expected, actual);
+        assertThat(actual).isNotNull()
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .extracting(CartDto::cartItems)
+                .asInstanceOf(InstanceOfAssertFactories.list(CartItemDto.class))
+                .hasSize(1)
+                .element(0)
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .hasFieldOrPropertyWithValue("bookId", 1L)
+                .hasFieldOrPropertyWithValue("bookTitle", "Effective Java")
+                .hasFieldOrPropertyWithValue("quantity", 2);
     }
 
     @Test
@@ -144,12 +146,11 @@ public class ShoppingCartControllerTest {
                 .andExpect(status().isNotFound())
                 .andReturn();
 
-        String expected = "Can't find book by id: %d".formatted(bookId);
         ErrorResponseWrapper error = objectMapper.readValue(
                 result.getResponse().getContentAsString(), ErrorResponseWrapper.class
         );
 
-        assertEquals(expected, error.details());
+        assertThat(error.details()).isEqualTo("Can't find book by id: %d".formatted(bookId));
     }
 
     @Test
@@ -160,10 +161,6 @@ public class ShoppingCartControllerTest {
         Long bookId = 1L;
         CreateCartItemRequestDto requestDto = new CreateCartItemRequestDto(
                 bookId, 2
-        );
-
-        CartDto expected = new CartDto(1L, Collections.singletonList(
-                new CartItemDto(1L, bookId, "Effective Java", 3))
         );
 
         MvcResult result = mockMvc.perform(post("/api/cart")
@@ -177,8 +174,16 @@ public class ShoppingCartControllerTest {
                 CartDto.class
         );
 
-        assertEquals(1L, actual.cartItems().size());
-        assertEquals(expected, actual);
+        assertThat(actual).isNotNull()
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .extracting(CartDto::cartItems)
+                .asInstanceOf(InstanceOfAssertFactories.list(CartItemDto.class))
+                .hasSize(1)
+                .element(0)
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .hasFieldOrPropertyWithValue("bookId", 1L)
+                .hasFieldOrPropertyWithValue("bookTitle", "Effective Java")
+                .hasFieldOrPropertyWithValue("quantity", 3);
     }
 
     @Test
@@ -188,10 +193,6 @@ public class ShoppingCartControllerTest {
     public void updateCartItem_ValidRequestDtoWithExistentId_Success() throws Exception {
         Long id = 1L;
         UpdateCartItemRequestDto requestDto = new UpdateCartItemRequestDto(2);
-
-        CartDto expected = new CartDto(1L, Collections.singletonList(
-                new CartItemDto(id, 1L, "Effective Java", 2))
-        );
 
         MvcResult result = mockMvc.perform(put("/api/cart/cart-items/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -204,7 +205,16 @@ public class ShoppingCartControllerTest {
                 CartDto.class
         );
 
-        assertEquals(expected, actual);
+        assertThat(actual).isNotNull()
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .extracting(CartDto::cartItems)
+                .asInstanceOf(InstanceOfAssertFactories.list(CartItemDto.class))
+                .hasSize(1)
+                .element(0)
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .hasFieldOrPropertyWithValue("bookId", 1L)
+                .hasFieldOrPropertyWithValue("bookTitle", "Effective Java")
+                .hasFieldOrPropertyWithValue("quantity", 2);
     }
 
     @Test
@@ -213,8 +223,6 @@ public class ShoppingCartControllerTest {
     @Sql(scripts = "classpath:database/shopping_cart/add-one-item.sql")
     public void deleteCartItem_WithExistentId_Success() throws Exception {
         Long id = 1L;
-
-        CartDto expected = new CartDto(1L, Collections.emptyList());
 
         MvcResult result = mockMvc.perform(delete("/api/cart/cart-items/" + id)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -226,8 +234,11 @@ public class ShoppingCartControllerTest {
                 CartDto.class
         );
 
-        assertEquals(0, actual.cartItems().size());
-        assertEquals(expected, actual);
+        assertThat(actual).isNotNull()
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .extracting(CartDto::cartItems)
+                .asInstanceOf(InstanceOfAssertFactories.list(CartItemDto.class))
+                .hasSize(0);
     }
 
     @Test
@@ -242,13 +253,11 @@ public class ShoppingCartControllerTest {
                 .andExpect(status().isNotFound())
                 .andReturn();
 
-        String expected = "Can't find cart item with id=%d in user's cart with email"
-                .formatted(id);
-
         ErrorResponseWrapper error = objectMapper.readValue(
                 result.getResponse().getContentAsString(), ErrorResponseWrapper.class
         );
 
-        assertTrue(error.details().startsWith(expected));
+        assertThat(error.details())
+                .startsWith("Can't find cart item with id=%d in user's cart with email".formatted(id));
     }
 }
