@@ -13,10 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.util.Arrays;
 import java.util.List;
-import javax.sql.DataSource;
 import lombok.SneakyThrows;
 import maksym.fedorenko.bookstore.dto.book.BookDtoWithoutCategories;
 import maksym.fedorenko.bookstore.dto.category.CategoryDto;
@@ -24,23 +22,25 @@ import maksym.fedorenko.bookstore.dto.category.CreateCategoryRequestDto;
 import maksym.fedorenko.bookstore.dto.category.UpdateCategoryRequestDto;
 import maksym.fedorenko.bookstore.exception.ErrorResponseWrapper;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Sql(scripts = "classpath:database/categories/delete-all-categories.sql",
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+)
+@SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 class CategoryControllerTest {
     protected static MockMvc mockMvc;
     private static ObjectMapper objectMapper;
@@ -53,18 +53,6 @@ class CategoryControllerTest {
                 .apply(springSecurity())
                 .build();
         objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-    }
-
-    @AfterEach
-    @SneakyThrows
-    void tearDown(@Autowired DataSource dataSource) {
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setAutoCommit(true);
-            ScriptUtils.executeSqlScript(
-                    connection,
-                    new ClassPathResource("database/categories/delete-all-categories.sql")
-            );
-        }
     }
 
     @Test

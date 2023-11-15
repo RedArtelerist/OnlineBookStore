@@ -1,8 +1,6 @@
 package maksym.fedorenko.bookstore.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,28 +11,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import javax.sql.DataSource;
 import lombok.SneakyThrows;
 import maksym.fedorenko.bookstore.dto.book.BookDto;
 import maksym.fedorenko.bookstore.dto.book.CreateBookRequestDto;
 import maksym.fedorenko.bookstore.dto.book.UpdateBookRequestDto;
 import maksym.fedorenko.bookstore.exception.ErrorResponseWrapper;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -43,51 +37,25 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Sql(scripts = "classpath:database/categories/add-default-categories.sql")
+@Sql(scripts = {
+        "classpath:database/books/delete-all-books.sql",
+        "classpath:database/categories/delete-all-categories.sql"},
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+)
+@SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 public class BookControllerTest {
     protected static MockMvc mockMvc;
     private static ObjectMapper objectMapper;
 
     @BeforeAll
     @SneakyThrows
-    static void beforeAll(
-            @Autowired WebApplicationContext applicationContext,
-            @Autowired DataSource dataSource) {
+    static void beforeAll(@Autowired WebApplicationContext applicationContext) {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(applicationContext)
                 .apply(springSecurity())
                 .build();
         objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setAutoCommit(true);
-            ScriptUtils.executeSqlScript(
-                    connection,
-                    new ClassPathResource("database/categories/add-default-categories.sql")
-            );
-        }
-    }
-
-    @AfterEach
-    @SneakyThrows
-    void tearDown(@Autowired DataSource dataSource) {
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setAutoCommit(true);
-            ScriptUtils.executeSqlScript(
-                    connection,
-                    new ClassPathResource("database/books/delete-all-books.sql")
-            );
-        }
-    }
-
-    @AfterAll
-    @SneakyThrows
-    static void afterAll(@Autowired DataSource dataSource) {
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setAutoCommit(true);
-            ScriptUtils.executeSqlScript(
-                    connection,
-                    new ClassPathResource("database/categories/delete-all-categories.sql")
-            );
-        }
     }
 
     @Test
@@ -104,17 +72,6 @@ public class BookControllerTest {
                 List.of(1L)
         );
 
-        BookDto expected = new BookDto(
-                null,
-                requestDto.title(),
-                requestDto.author(),
-                requestDto.isbn(),
-                requestDto.price(),
-                requestDto.description(),
-                requestDto.coverImage(),
-                requestDto.categoryIds()
-        );
-
         MvcResult result = mockMvc.perform(post("/api/books")
                         .content(objectMapper.writeValueAsString(requestDto))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -126,9 +83,13 @@ public class BookControllerTest {
                 BookDto.class
         );
 
-        assertNotNull(actual);
-        assertNotNull(actual.getId());
-        assertTrue(EqualsBuilder.reflectionEquals(expected, actual, "id"));
+        assertThat(actual).isNotNull()
+                .hasFieldOrProperty("id").isNotNull()
+                .hasFieldOrPropertyWithValue("title", "Harry Potter")
+                .hasFieldOrPropertyWithValue("author", "J. K. Rowling")
+                .hasFieldOrPropertyWithValue("isbn", "1456789101")
+                .hasFieldOrPropertyWithValue("price", BigDecimal.valueOf(30))
+                .hasFieldOrPropertyWithValue("categoryIds", Collections.singletonList(1L));
     }
 
     @Test
@@ -151,32 +112,19 @@ public class BookControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        String expected = "Request input parameters are missing or invalid";
         ErrorResponseWrapper error = objectMapper.readValue(
                 result.getResponse().getContentAsString(), ErrorResponseWrapper.class
         );
-        assertEquals(expected, error.details());
+        assertThat(error.details())
+                .isEqualTo("Request input parameters are missing or invalid");
     }
 
     @Test
     @DisplayName("Find book by existent id")
     @WithMockUser(username = "user", roles = "USER")
-    @Sql(
-            scripts = "classpath:database/books/add-one-book.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
+    @Sql(scripts = "classpath:database/books/add-one-book.sql")
     void getById_WithExistentId_Success() throws Exception {
         Long id = 1L;
-        BookDto expected = new BookDto(
-                id,
-                "Effective Java",
-                "Joshua Bloch",
-                "1234567890",
-                BigDecimal.valueOf(12.99),
-                null,
-                null,
-                List.of(1L, 2L)
-        );
 
         MvcResult result = mockMvc.perform(get("/api/books/" + id)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -188,16 +136,21 @@ public class BookControllerTest {
                 BookDto.class
         );
 
-        assertTrue(EqualsBuilder.reflectionEquals(expected, actual, "categoryIds"));
+        assertThat(actual)
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .hasFieldOrPropertyWithValue("title", "Effective Java")
+                .hasFieldOrPropertyWithValue("author", "Joshua Bloch")
+                .hasFieldOrPropertyWithValue("isbn", "1234567890")
+                .hasFieldOrPropertyWithValue("price", BigDecimal.valueOf(12.99))
+                .extracting(BookDto::getCategoryIds)
+                .asInstanceOf(InstanceOfAssertFactories.list(Long.class))
+                .containsExactlyInAnyOrderElementsOf(List.of(1L, 2L));
     }
 
     @Test
-    @DisplayName("Find book by nonExistent id")
+    @DisplayName("Find book by non-existent id")
     @WithMockUser(username = "user", roles = "USER")
-    @Sql(
-            scripts = "classpath:database/books/add-one-book.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
+    @Sql(scripts = "classpath:database/books/add-one-book.sql")
     void getById_WithNonExistedId_BadRequest() throws Exception {
         Long id = 100000L;
 
@@ -206,27 +159,21 @@ public class BookControllerTest {
                 .andExpect(status().isNotFound())
                 .andReturn();
 
-        String expected = "Can't find book by id: " + id;
         ErrorResponseWrapper error = objectMapper.readValue(
                 result.getResponse().getContentAsString(), ErrorResponseWrapper.class
         );
-        assertEquals(expected, error.details());
+        assertThat(error.details()).isEqualTo("Can't find book by id: " + id);
     }
 
     @Test
     @DisplayName("Filter books with valid parameters")
     @WithMockUser(username = "user", roles = "USER")
-    @Sql(
-            scripts = "classpath:database/books/add-default-books.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
+    @Sql(scripts = "classpath:database/books/add-default-books.sql")
     void searchBooks_ValidRequestDto_Success() throws Exception {
         MultiValueMap<String, String> requestParams = new LinkedMultiValueMap<>();
         requestParams.add("title", "java");
         requestParams.add("minPrice", "10");
         requestParams.add("maxPrice", "20");
-
-        List<Long> expected = List.of(1L, 5L);
 
         MvcResult result = mockMvc.perform(get("/api/books/search")
                         .params(requestParams)
@@ -234,17 +181,13 @@ public class BookControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        BookDto[] actual = objectMapper.readValue(
-                result.getResponse().getContentAsString(),
-                BookDto[].class
-        );
-        assertEquals(2, actual.length);
-        assertEquals(
-                expected,
-                Arrays.stream(actual)
-                        .map(BookDto::getId)
-                        .toList()
-        );
+        List<Long> actual = Arrays.stream(
+                objectMapper.readValue(result.getResponse().getContentAsString(), BookDto[].class)
+        ).map(BookDto::getId).toList();
+
+        assertThat(actual)
+                .hasSize(2)
+                .containsExactlyInAnyOrder(1L, 5L);
     }
 
     @Test
@@ -266,27 +209,13 @@ public class BookControllerTest {
     @Test
     @DisplayName("Update existent book with valid request")
     @WithMockUser(username = "admin", roles = {"USER", "ADMIN"})
-    @Sql(
-            scripts = "classpath:database/books/add-one-book.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
+    @Sql(scripts = "classpath:database/books/add-one-book.sql")
     void updateBook_ValidRequestDtoAndExistentId_Success() throws Exception {
         Long id = 1L;
         UpdateBookRequestDto requestDto = new UpdateBookRequestDto(
                 "Java Puzzlers",
                 null,
                 null,
-                BigDecimal.valueOf(30),
-                null,
-                null,
-                List.of(3L)
-        );
-
-        BookDto expected = new BookDto(
-                id,
-                "Java Puzzlers",
-                "Joshua Bloch",
-                "1234567890",
                 BigDecimal.valueOf(30),
                 null,
                 null,
@@ -304,16 +233,19 @@ public class BookControllerTest {
                 BookDto.class
         );
 
-        assertEquals(expected, actual);
+        assertThat(actual)
+                .hasFieldOrPropertyWithValue("id", id)
+                .hasFieldOrPropertyWithValue("title", "Java Puzzlers")
+                .hasFieldOrPropertyWithValue("author", "Joshua Bloch")
+                .hasFieldOrPropertyWithValue("isbn", "1234567890")
+                .hasFieldOrPropertyWithValue("price", BigDecimal.valueOf(30))
+                .hasFieldOrPropertyWithValue("categoryIds", Collections.singletonList(3L));
     }
 
     @Test
     @DisplayName("Delete book by existent id")
     @WithMockUser(username = "admin", roles = {"USER", "ADMIN"})
-    @Sql(
-            scripts = "classpath:database/books/add-one-book.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
+    @Sql(scripts = "classpath:database/books/add-one-book.sql")
     void deleteCategory_WithExistentId_Success() throws Exception {
         Long id = 1L;
         mockMvc.perform(delete("/api/books/" + id)

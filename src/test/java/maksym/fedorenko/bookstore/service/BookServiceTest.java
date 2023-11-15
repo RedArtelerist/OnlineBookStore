@@ -1,6 +1,7 @@
 package maksym.fedorenko.bookstore.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
@@ -10,22 +11,28 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import maksym.fedorenko.bookstore.dto.book.BookDto;
 import maksym.fedorenko.bookstore.dto.book.CreateBookRequestDto;
+import maksym.fedorenko.bookstore.dto.book.UpdateBookRequestDto;
 import maksym.fedorenko.bookstore.exception.EntityNotFoundException;
 import maksym.fedorenko.bookstore.mapper.BookMapper;
+import maksym.fedorenko.bookstore.mapper.BookMapperImpl;
 import maksym.fedorenko.bookstore.model.Book;
 import maksym.fedorenko.bookstore.model.Category;
 import maksym.fedorenko.bookstore.repository.BookRepository;
 import maksym.fedorenko.bookstore.repository.CategoryRepository;
 import maksym.fedorenko.bookstore.service.impl.BookServiceImpl;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,8 +41,8 @@ public class BookServiceTest {
     private BookRepository bookRepository;
     @Mock
     private CategoryRepository categoryRepository;
-    @Mock
-    private BookMapper bookMapper;
+    @Spy
+    private BookMapper bookMapper = new BookMapperImpl();
     @InjectMocks
     private BookServiceImpl bookService;
 
@@ -50,21 +57,14 @@ public class BookServiceTest {
         book.setAuthor("Robert Martin");
         book.setPrice(BigDecimal.valueOf(10));
 
-        BookDto bookDto = new BookDto(
-                book.getId(), book.getTitle(), book.getAuthor(),
-                book.getIsbn(), book.getPrice(),
-                null, null, null
-        );
-
         when(bookRepository.findById(id)).thenReturn(Optional.of(book));
-        when(bookMapper.toDto(book)).thenReturn(bookDto);
 
-        BookDto actual = bookService.getById(id);
-        assertEquals(bookDto, actual);
-
-        verify(bookRepository, times(1)).findById(id);
-        verify(bookMapper, times(1)).toDto(book);
-        verifyNoMoreInteractions(bookRepository, bookMapper);
+        BookDto bookDto = bookService.getById(id);
+        assertThat(bookDto)
+                .hasFieldOrPropertyWithValue("id", id)
+                .hasFieldOrPropertyWithValue("title", "Clean Code")
+                .hasFieldOrPropertyWithValue("author", "Robert Martin")
+                .hasFieldOrPropertyWithValue("price", BigDecimal.valueOf(10));
     }
 
     @Test
@@ -74,55 +74,49 @@ public class BookServiceTest {
 
         when(bookRepository.findById(id)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(
-                EntityNotFoundException.class,
-                () -> bookService.getById(id)
-        );
-        String expected = "Can't find book by id: " + id;
-        assertEquals(expected, exception.getMessage());
-
-        verify(bookRepository, times(1)).findById(id);
-        verifyNoMoreInteractions(bookRepository);
+        assertThatThrownBy(() -> bookService.getById(id))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Can't find book by id: " + id);
     }
 
     @Test
     @DisplayName("Create new valid book")
     void save_ValidCreateBookRequestDto_ReturnBookDto() {
-        Long bookId = 1L;
         CreateBookRequestDto requestDto = new CreateBookRequestDto(
-                "Clean Code", "Robert Martin", "1234567890",
-                BigDecimal.valueOf(10), null, null,
-                List.of(bookId)
+                "Clean Code",
+                "Robert Martin",
+                "1234567890",
+                BigDecimal.valueOf(10),
+                null,
+                null,
+                List.of(1L, 2L)
         );
+
+        Category category1 = new Category();
+        category1.setId(1L);
+        Category category2 = new Category();
+        category2.setId(2L);
 
         Book book = new Book();
         book.setTitle(requestDto.title());
         book.setAuthor(requestDto.author());
         book.setIsbn(requestDto.isbn());
         book.setPrice(requestDto.price());
+        book.setCategories(Set.of(category1, category2));
 
-        Category category = new Category();
-        category.setId(1L);
-
-        BookDto bookDto = new BookDto(
-                1L, book.getTitle(), book.getAuthor(),
-                book.getIsbn(), book.getPrice(),
-                null, null, null
-        );
-
-        when(bookMapper.toBook(requestDto)).thenReturn(book);
-        when(categoryRepository.getReferenceById(bookId)).thenReturn(category);
+        when(categoryRepository.getReferenceById(anyLong())).thenReturn(category1, category2);
         when(bookRepository.save(book)).thenReturn(book);
-        when(bookMapper.toDto(book)).thenReturn(bookDto);
 
-        BookDto savedBookDto = bookService.save(requestDto);
+        BookDto bookDto = bookService.save(requestDto);
 
-        assertEquals(bookDto, savedBookDto);
-        verify(bookMapper, times(1)).toBook(requestDto);
-        verify(categoryRepository, times(1)).getReferenceById(bookId);
-        verify(bookRepository, times(1)).save(book);
-        verify(bookMapper, times(1)).toDto(book);
-        verifyNoMoreInteractions(categoryRepository, bookRepository, bookMapper);
+        assertThat(bookDto)
+                .hasFieldOrPropertyWithValue("title", "Clean Code")
+                .hasFieldOrPropertyWithValue("author", "Robert Martin")
+                .hasFieldOrPropertyWithValue("isbn", "1234567890")
+                .hasFieldOrPropertyWithValue("price", BigDecimal.valueOf(10))
+                .extracting("categoryIds")
+                .asInstanceOf(InstanceOfAssertFactories.list(Long.class))
+                .containsExactlyInAnyOrder(1L, 2L);
     }
 
     @Test
@@ -135,20 +129,50 @@ public class BookServiceTest {
                 List.of(categoryId)
         );
 
-        Book book = new Book();
-        book.setTitle(requestDto.title());
-        book.setAuthor(requestDto.author());
-        book.setIsbn(requestDto.isbn());
-        book.setPrice(requestDto.price());
-
-        when(bookMapper.toBook(requestDto)).thenReturn(book);
         when(categoryRepository.getReferenceById(categoryId))
                 .thenThrow(EntityNotFoundException.class);
 
+        assertThatThrownBy(() -> bookService.save(requestDto))
+                .isInstanceOf(EntityNotFoundException.class);
         assertThrows(EntityNotFoundException.class, () -> bookService.save(requestDto));
-        verify(bookMapper, times(1)).toBook(requestDto);
-        verify(categoryRepository, times(1)).getReferenceById(categoryId);
-        verifyNoMoreInteractions(categoryRepository, bookRepository, bookMapper);
+    }
+
+    @Test
+    @DisplayName("Update book by existent id")
+    void update_WithExistingId_ReturnBookDto() {
+        final Long id = 1L;
+        final UpdateBookRequestDto requestDto = new UpdateBookRequestDto(
+                "Effective Java",
+                "Joshua Bloch",
+                "1234567890",
+                BigDecimal.valueOf(30),
+                null,
+                null,
+                Collections.emptyList()
+        );
+
+        Category category = new Category();
+        category.setId(1L);
+        Book book = new Book();
+        book.setId(1L);
+        book.setTitle("Clean Code");
+        book.setAuthor("Robert Martin");
+        book.setIsbn("123456789");
+        book.setPrice(BigDecimal.valueOf(30));
+        book.setCategories(Set.of(category));
+
+        when(bookRepository.findById(id)).thenReturn(Optional.of(book));
+        when(bookRepository.save(book)).thenReturn(book);
+
+        BookDto bookDto = bookService.update(id, requestDto);
+
+        assertThat(bookDto)
+                .hasFieldOrPropertyWithValue("id", id)
+                .hasFieldOrPropertyWithValue("title", "Effective Java")
+                .hasFieldOrPropertyWithValue("author", "Joshua Bloch")
+                .hasFieldOrPropertyWithValue("isbn", "1234567890")
+                .hasFieldOrPropertyWithValue("price", BigDecimal.valueOf(30))
+                .hasFieldOrPropertyWithValue("categoryIds", Collections.emptyList());
     }
 
     @Test
@@ -171,11 +195,9 @@ public class BookServiceTest {
         Long id = -1L;
         when(bookRepository.existsById(id)).thenReturn(false);
 
-        Exception exception = assertThrows(
-                EntityNotFoundException.class, () -> bookService.delete(id)
-        );
-        String expected = "Book with id=%d doesn't exist".formatted(id);
-        assertEquals(expected, exception.getMessage());
+        assertThatThrownBy(() -> bookService.delete(id))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Book with id=%d doesn't exist".formatted(id));
 
         verify(bookRepository, times(1)).existsById(id);
         verifyNoMoreInteractions(bookRepository);

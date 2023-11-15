@@ -1,7 +1,7 @@
 package maksym.fedorenko.bookstore.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -16,6 +16,7 @@ import maksym.fedorenko.bookstore.dto.category.CreateCategoryRequestDto;
 import maksym.fedorenko.bookstore.dto.category.UpdateCategoryRequestDto;
 import maksym.fedorenko.bookstore.exception.EntityNotFoundException;
 import maksym.fedorenko.bookstore.mapper.CategoryMapper;
+import maksym.fedorenko.bookstore.mapper.CategoryMapperImpl;
 import maksym.fedorenko.bookstore.model.Category;
 import maksym.fedorenko.bookstore.repository.CategoryRepository;
 import maksym.fedorenko.bookstore.service.impl.CategoryServiceImpl;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -34,8 +36,8 @@ import org.springframework.data.domain.Pageable;
 class CategoryServiceTest {
     @Mock
     private CategoryRepository categoryRepository;
-    @Mock
-    private CategoryMapper categoryMapper;
+    @Spy
+    private CategoryMapper categoryMapper = new CategoryMapperImpl();
     @InjectMocks
     private CategoryServiceImpl categoryService;
 
@@ -46,17 +48,15 @@ class CategoryServiceTest {
         Category category = new Category();
         category.setId(id);
         category.setName("Programming");
-        CategoryDto categoryDto = new CategoryDto(id, "Programming", null);
 
         when(categoryRepository.findById(id)).thenReturn(Optional.of(category));
-        when(categoryMapper.toDto(category)).thenReturn(categoryDto);
 
-        CategoryDto actual = categoryService.getById(id);
-        assertEquals(categoryDto, actual);
+        CategoryDto categoryDto = categoryService.getById(id);
 
-        verify(categoryRepository, times(1)).findById(id);
-        verify(categoryMapper, times(1)).toDto(category);
-        verifyNoMoreInteractions(categoryRepository, categoryMapper);
+        assertThat(categoryDto)
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .hasFieldOrPropertyWithValue("name", "Programming")
+                .hasFieldOrPropertyWithValue("description", null);
     }
 
     @Test
@@ -66,15 +66,9 @@ class CategoryServiceTest {
 
         when(categoryRepository.findById(id)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(
-                EntityNotFoundException.class,
-                () -> categoryService.getById(id)
-        );
-        String expected = "Can't find category by id: " + id;
-        assertEquals(expected, exception.getMessage());
-
-        verify(categoryRepository, times(1)).findById(id);
-        verifyNoMoreInteractions(categoryRepository);
+        assertThatThrownBy(() -> categoryService.getById(id))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Can't find category by id: " + id);
     }
 
     @Test
@@ -86,19 +80,13 @@ class CategoryServiceTest {
         Category category = new Category();
         category.setName("Programming");
 
-        CategoryDto categoryDto = new CategoryDto(1L, "Programming", null);
-
-        when(categoryMapper.toCategory(requestDto)).thenReturn(category);
         when(categoryRepository.save(category)).thenReturn(category);
-        when(categoryMapper.toDto(category)).thenReturn(categoryDto);
 
-        CategoryDto savedCategoryDto = categoryService.save(requestDto);
+        CategoryDto categoryDto = categoryService.save(requestDto);
 
-        assertEquals(categoryDto, savedCategoryDto);
-        verify(categoryMapper, times(1)).toCategory(requestDto);
-        verify(categoryRepository, times(1)).save(category);
-        verify(categoryMapper, times(1)).toDto(category);
-        verifyNoMoreInteractions(categoryRepository, categoryMapper);
+        assertThat(categoryDto)
+                .hasFieldOrPropertyWithValue("name", "Programming")
+                .hasFieldOrPropertyWithValue("description", null);
     }
 
     @Test
@@ -106,29 +94,21 @@ class CategoryServiceTest {
     void findAll_ValidPageable_ReturnAllCategories() {
         Category category = new Category();
         category.setId(1L);
-        category.setName("Effective Java");
-
-        CategoryDto categoryDto = new CategoryDto(
-                category.getId(),
-                category.getName(),
-                category.getDescription()
-        );
+        category.setName("Programming");
 
         Pageable pageable = PageRequest.of(0, 10);
         List<Category> categories = List.of(category);
         Page<Category> categoryPage = new PageImpl<>(categories, pageable, categories.size());
 
         when(categoryRepository.findAll(pageable)).thenReturn(categoryPage);
-        when(categoryMapper.toDto(category)).thenReturn(categoryDto);
 
         List<CategoryDto> categoryDtos = categoryService.findAll(pageable);
 
-        assertEquals(1, categoryDtos.size());
-        assertEquals(categoryDto, categoryDtos.get(0));
-
-        verify(categoryRepository, times(1)).findAll(pageable);
-        verify(categoryMapper, times(1)).toDto(category);
-        verifyNoMoreInteractions(categoryRepository, categoryMapper);
+        assertThat(categoryDtos)
+                .hasSize(1)
+                .element(0)
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .hasFieldOrPropertyWithValue("name", "Programming");
     }
 
     @Test
@@ -143,25 +123,15 @@ class CategoryServiceTest {
         category.setId(id);
         category.setName("Education");
 
-        Category updatedCategory = new Category();
-        updatedCategory.setId(category.getId());
-        category.setName("Programming");
-
-        CategoryDto categoryDto = new CategoryDto(1L, "Programming", null);
-
         when(categoryRepository.findById(id)).thenReturn(Optional.of(category));
-        doNothing().when(categoryMapper).updateCategory(requestDto, category);
-        when(categoryRepository.save(category)).thenReturn(updatedCategory);
-        when(categoryMapper.toDto(updatedCategory)).thenReturn(categoryDto);
+        when(categoryRepository.save(category)).thenReturn(category);
 
-        CategoryDto updatedCategoryDto = categoryService.update(id, requestDto);
+        CategoryDto categoryDto = categoryService.update(id, requestDto);
 
-        assertEquals(categoryDto, updatedCategoryDto);
-        verify(categoryRepository, times(1)).findById(id);
-        verify(categoryMapper, times(1)).updateCategory(requestDto, category);
-        verify(categoryRepository, times(1)).save(category);
-        verify(categoryMapper, times(1)).toDto(updatedCategory);
-        verifyNoMoreInteractions(categoryRepository, categoryMapper);
+        assertThat(categoryDto)
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .hasFieldOrPropertyWithValue("name", "Programming")
+                .hasFieldOrPropertyWithValue("description", null);
     }
 
     @Test
@@ -184,11 +154,9 @@ class CategoryServiceTest {
         Long id = -1L;
         when(categoryRepository.existsById(id)).thenReturn(false);
 
-        Exception exception = assertThrows(
-                EntityNotFoundException.class, () -> categoryService.delete(id)
-        );
-        String expected = "Category with id=%d doesn't exist".formatted(id);
-        assertEquals(expected, exception.getMessage());
+        assertThatThrownBy(() -> categoryService.delete(id))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Category with id=%d doesn't exist".formatted(id));
 
         verify(categoryRepository, times(1)).existsById(id);
         verifyNoMoreInteractions(categoryRepository);
