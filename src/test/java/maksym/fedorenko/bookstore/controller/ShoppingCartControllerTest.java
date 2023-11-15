@@ -258,6 +258,7 @@ public class ShoppingCartControllerTest {
         );
 
         assertThat(error.details())
-                .startsWith("Can't find cart item with id=%d in user's cart with email".formatted(id));
+                .startsWith("Can't find cart item with id=%d in user's cart with email"
+                        .formatted(id));
     }
 }
