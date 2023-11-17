@@ -166,6 +166,33 @@ public class BookControllerTest {
     }
 
     @Test
+    @DisplayName("Find all books")
+    @WithMockUser(username = "user", roles = "USER")
+    @Sql(scripts = "classpath:database/books/add-one-book.sql")
+    void getAll_ValidRequest_Success() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/books")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        List<BookDto> actual = Arrays.stream(
+                objectMapper.readValue(result.getResponse().getContentAsString(), BookDto[].class)
+        ).toList();
+
+        assertThat(actual)
+                .hasSize(1)
+                .element(0)
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .hasFieldOrPropertyWithValue("title", "Effective Java")
+                .hasFieldOrPropertyWithValue("author", "Joshua Bloch")
+                .hasFieldOrPropertyWithValue("isbn", "1234567890")
+                .hasFieldOrPropertyWithValue("price", BigDecimal.valueOf(12.99))
+                .extracting(BookDto::getCategoryIds)
+                .asInstanceOf(InstanceOfAssertFactories.list(Long.class))
+                .containsExactlyInAnyOrderElementsOf(List.of(1L, 2L));
+    }
+
+    @Test
     @DisplayName("Filter books with valid parameters")
     @WithMockUser(username = "user", roles = "USER")
     @Sql(scripts = "classpath:database/books/add-default-books.sql")
