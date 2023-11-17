@@ -1,18 +1,13 @@
 package maksym.fedorenko.bookstore.mapper;
 
+import maksym.fedorenko.bookstore.config.MapperConfig;
 import maksym.fedorenko.bookstore.dto.order.OrderItemDto;
 import maksym.fedorenko.bookstore.model.CartItem;
 import maksym.fedorenko.bookstore.model.OrderItem;
-import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.NullValueCheckStrategy;
 
-@Mapper(
-        componentModel = "spring",
-        injectionStrategy = InjectionStrategy.CONSTRUCTOR,
-        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS
-)
+@Mapper(config = MapperConfig.class)
 public interface OrderItemMapper {
     @Mapping(target = "bookId", source = "book.id")
     OrderItemDto toDto(OrderItem orderItem);
