@@ -1,5 +1,6 @@
 package maksym.fedorenko.bookstore.mapper;
 
+import maksym.fedorenko.bookstore.config.MapperConfig;
 import maksym.fedorenko.bookstore.dto.book.BookDto;
 import maksym.fedorenko.bookstore.dto.book.BookDtoWithoutCategories;
 import maksym.fedorenko.bookstore.dto.book.CreateBookRequestDto;
@@ -8,17 +9,11 @@ import maksym.fedorenko.bookstore.model.Book;
 import maksym.fedorenko.bookstore.model.Category;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.BeanMapping;
-import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(
-        componentModel = "spring",
-        injectionStrategy = InjectionStrategy.CONSTRUCTOR,
-        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS
-)
+@Mapper(config = MapperConfig.class)
 public interface BookMapper {
     BookDto toDto(Book book);
 
