@@ -40,7 +40,7 @@ import org.springframework.web.context.WebApplicationContext;
 )
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 public class ShoppingCartControllerTest {
-    protected static MockMvc mockMvc;
+    private static MockMvc mockMvc;
     private static ObjectMapper objectMapper;
 
     @BeforeAll
@@ -58,8 +58,7 @@ public class ShoppingCartControllerTest {
     @WithMockUser(username = "user@gmail.com", roles = "USER")
     @Sql(scripts = "classpath:database/shopping_cart/add-one-item.sql")
     public void getUserCart_WithExistingUser_Success() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/cart")
-                        .contentType(MediaType.APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(get("/api/cart"))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -85,8 +84,7 @@ public class ShoppingCartControllerTest {
     @WithMockUser(username = "another_user@gmail.com", roles = "USER")
     @Sql(scripts = "classpath:database/shopping_cart/add-one-item.sql")
     public void getUserCart_WithNonExistentUser_BadRequest() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/cart")
-                        .contentType(MediaType.APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(get("/api/cart"))
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -118,7 +116,7 @@ public class ShoppingCartControllerTest {
                 CartDto.class
         );
 
-        assertThat(actual).isNotNull()
+        assertThat(actual)
                 .hasFieldOrPropertyWithValue("id", 1L)
                 .extracting(CartDto::cartItems)
                 .asInstanceOf(InstanceOfAssertFactories.list(CartItemDto.class))
@@ -150,7 +148,11 @@ public class ShoppingCartControllerTest {
                 result.getResponse().getContentAsString(), ErrorResponseWrapper.class
         );
 
-        assertThat(error.details()).isEqualTo("Can't find book by id: %d".formatted(bookId));
+        assertThat(error)
+                .hasFieldOrPropertyWithValue("error", "entity-not-found")
+                .hasFieldOrPropertyWithValue("details", "Can't find book by id: %d"
+                        .formatted(bookId)
+                );
     }
 
     @Test
