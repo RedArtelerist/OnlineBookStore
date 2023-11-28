@@ -1,15 +1,10 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: password
+    url: jdbc:tc:mysql:8:///test_book_store_db
+    username: test
+    password: test
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
 jwt:
-  expiration: 1200000
-  secret: fkaafa1r88)_402492fls;l2=040;fs'104jfjlf1804180
-springdoc:
-  swagger-ui:
-    tags-sorter: alpha
-  writer-with-order-by-keys: true
+  expiration: ${JWT_EXPIRATION:600000}
+  secret: ${JWT_SECRET:somesecretkey-10-=1=falkaflk91900913fkjaf19080}

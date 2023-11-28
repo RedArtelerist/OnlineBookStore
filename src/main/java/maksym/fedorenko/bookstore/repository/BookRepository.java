@@ -1,7 +1,6 @@
 package maksym.fedorenko.bookstore.repository;
 
 import com.querydsl.core.types.Predicate;
-import java.util.List;
 import java.util.Optional;
 import maksym.fedorenko.bookstore.model.Book;
 import org.springframework.data.domain.Page;
@@ -22,5 +21,5 @@ public interface BookRepository extends JpaRepository<Book, Long>, QuerydslPredi
     @EntityGraph(attributePaths = "categories")
     Page<Book> findAll(Predicate predicate, Pageable pageable);
 
-    List<Book> findAllByCategoriesId(Long id, Pageable pageable);
+    Page<Book> findAllByCategoriesId(Long id, Pageable pageable);
 }
