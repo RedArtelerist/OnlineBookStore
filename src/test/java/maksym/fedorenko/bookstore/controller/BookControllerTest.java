@@ -122,7 +122,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("Find book by existent id")
     @WithMockUser(username = "user", roles = "USER")
-    @Sql(scripts = "classpath:database/books/add-one-book.sql")
+    @Sql(scripts = "classpath:database/books/add-one-book-with-categories.sql")
     void getById_WithExistentId_Success() throws Exception {
         Long id = 1L;
 
@@ -150,7 +150,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("Find book by non-existent id")
     @WithMockUser(username = "user", roles = "USER")
-    @Sql(scripts = "classpath:database/books/add-one-book.sql")
+    @Sql(scripts = "classpath:database/books/add-one-book-with-categories.sql")
     void getById_WithNonExistedId_BadRequest() throws Exception {
         Long id = 100000L;
 
@@ -168,7 +168,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("Find all books")
     @WithMockUser(username = "user", roles = "USER")
-    @Sql(scripts = "classpath:database/books/add-one-book.sql")
+    @Sql(scripts = "classpath:database/books/add-one-book-with-categories.sql")
     void getAll_ValidRequest_Success() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/books")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -195,7 +195,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("Filter books with valid parameters")
     @WithMockUser(username = "user", roles = "USER")
-    @Sql(scripts = "classpath:database/books/add-default-books.sql")
+    @Sql(scripts = "classpath:database/books/add-default-books-with-categories.sql")
     void searchBooks_ValidRequestDto_Success() throws Exception {
         MultiValueMap<String, String> requestParams = new LinkedMultiValueMap<>();
         requestParams.add("title", "java");
@@ -236,7 +236,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("Update existent book with valid request")
     @WithMockUser(username = "admin", roles = {"USER", "ADMIN"})
-    @Sql(scripts = "classpath:database/books/add-one-book.sql")
+    @Sql(scripts = "classpath:database/books/add-one-book-with-categories.sql")
     void updateBook_ValidRequestDtoAndExistentId_Success() throws Exception {
         Long id = 1L;
         UpdateBookRequestDto requestDto = new UpdateBookRequestDto(
@@ -272,7 +272,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("Delete book by existent id")
     @WithMockUser(username = "admin", roles = {"USER", "ADMIN"})
-    @Sql(scripts = "classpath:database/books/add-one-book.sql")
+    @Sql(scripts = "classpath:database/books/add-one-book-with-categories.sql")
     void deleteCategory_WithExistentId_Success() throws Exception {
         Long id = 1L;
         mockMvc.perform(delete("/api/books/" + id)
@@ -284,10 +284,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("Delete book by without Admin role")
     @WithMockUser(username = "admin", roles = "USER")
-    @Sql(
-            scripts = "classpath:database/books/add-one-book.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
+    @Sql(scripts = "classpath:database/books/add-one-book-with-categories.sql")
     void deleteBook_WithoutAdminRole_Forbidden() throws Exception {
         Long id = 1L;
         mockMvc.perform(delete("/api/books/" + id)
