@@ -20,10 +20,10 @@ import org.springframework.test.context.jdbc.Sql;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql(scripts = {"classpath:database/categories/add-default-categories.sql",
-        "classpath:database/books/add-default-books.sql"
+        "classpath:database/books/add-default-books-with-categories.sql"
 })
 @Sql(scripts = {"classpath:database/books/delete-all-books.sql",
-        "classpath:database/categories/delete-all-categories.sql"
+        "classpath:database/categories/delete-all-categories.sql",
 }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class BookRepositoryTest {
     @Autowired
