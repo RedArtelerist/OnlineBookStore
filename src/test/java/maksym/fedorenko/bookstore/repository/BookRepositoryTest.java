@@ -5,66 +5,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.querydsl.core.types.Predicate;
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
-import javax.sql.DataSource;
-import lombok.SneakyThrows;
 import maksym.fedorenko.bookstore.model.Book;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.jdbc.datasource.init.ScriptUtils;
+import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Sql(scripts = {"classpath:database/categories/add-default-categories.sql",
+        "classpath:database/books/add-default-books.sql"
+})
+@Sql(scripts = {"classpath:database/books/delete-all-books.sql",
+        "classpath:database/categories/delete-all-categories.sql"
+}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class BookRepositoryTest {
     @Autowired
     private BookRepository bookRepository;
-
-    @BeforeAll
-    @SneakyThrows
-    static void beforeAll(@Autowired DataSource dataSource) {
-        tearDown(dataSource);
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setAutoCommit(true);
-            ScriptUtils.executeSqlScript(
-                    connection,
-                    new ClassPathResource("database/categories/add-default-categories.sql")
-            );
-            ScriptUtils.executeSqlScript(
-                    connection,
-                    new ClassPathResource("database/books/add-default-books.sql")
-            );
-        }
-    }
-
-    @AfterAll
-    static void afterAll(@Autowired DataSource dataSource) {
-        tearDown(dataSource);
-    }
-
-    @SneakyThrows
-    static void tearDown(DataSource dataSource) {
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setAutoCommit(true);
-            ScriptUtils.executeSqlScript(
-                    connection,
-                    new ClassPathResource("database/books/delete-all-books.sql")
-            );
-            ScriptUtils.executeSqlScript(
-                    connection,
-                    new ClassPathResource("database/categories/delete-all-categories.sql")
-            );
-        }
-    }
 
     @Test
     @DisplayName("Find book by nonexistent id")

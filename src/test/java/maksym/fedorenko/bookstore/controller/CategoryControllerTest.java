@@ -166,7 +166,7 @@ class CategoryControllerTest {
     @Test
     @DisplayName("Find category by nonExistent id")
     @WithMockUser(username = "user", roles = "USER")
-    void getById_WithNonExistedId_BadRequest() throws Exception {
+    void getById_WithNonExistedId_NotFound() throws Exception {
         Long id = 100000L;
 
         MvcResult result = mockMvc.perform(get("/api/categories/" + id)
