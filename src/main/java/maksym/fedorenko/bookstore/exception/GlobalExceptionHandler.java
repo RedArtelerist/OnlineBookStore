@@ -2,35 +2,34 @@ package maksym.fedorenko.bookstore.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import maksym.fedorenko.bookstore.dto.exception.ErrorResponseWrapper;
+import maksym.fedorenko.bookstore.dto.exception.ErrorsResponseWrapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.context.request.WebRequest;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponseWrapper handleInvalidArguments(
-            MethodArgumentNotValidException ex, WebRequest request
+    public ErrorsResponseWrapper handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex
     ) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors()
-                .forEach(e -> errors.put(e.getField(), e.getDefaultMessage()));
-        String requestUri = ((ServletWebRequest) request).getRequest().getRequestURI();
-        log.warn("Validation errors for {}: {}", requestUri, errors);
-        return new ErrorResponseWrapper(LocalDateTime.now(), "bad-request",
-                "Request input parameters are missing or invalid"
-        );
+        List<String> errors = ex.getBindingResult()
+                .getAllErrors()
+                .stream()
+                .map(this::getErrorMessage)
+                .toList();
+        return new ErrorsResponseWrapper(LocalDateTime.now(), "bad-request", errors);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -73,5 +72,14 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ErrorResponseWrapper handleCreateOrderException(CreateOrderException ex) {
         return new ErrorResponseWrapper(LocalDateTime.now(), "bad-request", ex.getMessage());
+    }
+
+    private String getErrorMessage(ObjectError e) {
+        if (e instanceof FieldError) {
+            String field = ((FieldError) e).getField();
+            String message = e.getDefaultMessage();
+            return field + " " + message;
+        }
+        return e.getDefaultMessage();
     }
 }

@@ -18,7 +18,8 @@ import lombok.SneakyThrows;
 import maksym.fedorenko.bookstore.dto.book.BookDto;
 import maksym.fedorenko.bookstore.dto.book.CreateBookRequestDto;
 import maksym.fedorenko.bookstore.dto.book.UpdateBookRequestDto;
-import maksym.fedorenko.bookstore.exception.ErrorResponseWrapper;
+import maksym.fedorenko.bookstore.dto.exception.ErrorResponseWrapper;
+import maksym.fedorenko.bookstore.dto.exception.ErrorsResponseWrapper;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -112,11 +113,13 @@ public class BookControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        ErrorResponseWrapper error = objectMapper.readValue(
-                result.getResponse().getContentAsString(), ErrorResponseWrapper.class
+        ErrorsResponseWrapper errors = objectMapper.readValue(
+                result.getResponse().getContentAsString(), ErrorsResponseWrapper.class
         );
-        assertThat(error.details())
-                .isEqualTo("Request input parameters are missing or invalid");
+        assertThat(errors.details())
+                .hasSize(1)
+                .element(0)
+                .isEqualTo("categoryIds must not be null");
     }
 
     @Test

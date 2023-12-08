@@ -18,7 +18,8 @@ import maksym.fedorenko.bookstore.dto.book.BookDtoWithoutCategories;
 import maksym.fedorenko.bookstore.dto.category.CategoryDto;
 import maksym.fedorenko.bookstore.dto.category.CreateCategoryRequestDto;
 import maksym.fedorenko.bookstore.dto.category.UpdateCategoryRequestDto;
-import maksym.fedorenko.bookstore.exception.ErrorResponseWrapper;
+import maksym.fedorenko.bookstore.dto.exception.ErrorResponseWrapper;
+import maksym.fedorenko.bookstore.dto.exception.ErrorsResponseWrapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -91,11 +92,14 @@ class CategoryControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        ErrorResponseWrapper error = objectMapper.readValue(
-                result.getResponse().getContentAsString(), ErrorResponseWrapper.class
+        ErrorsResponseWrapper errors = objectMapper.readValue(
+                result.getResponse().getContentAsString(), ErrorsResponseWrapper.class
         );
 
-        assertThat(error.details()).isEqualTo("Request input parameters are missing or invalid");
+        assertThat(errors.details())
+                .hasSize(1)
+                .element(0)
+                .isEqualTo("name must not be blank");
     }
 
     @Test
