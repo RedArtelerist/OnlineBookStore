@@ -104,7 +104,7 @@ PATCH: /api/orders/{id} - Edit order status of a specific order (ADMIN)
 ### Video demo
 <a href="https://www.loom.com/share/d875e1c1a6e649c4a7b765ca6001f79e">Link for short demo of this API</a>
 ### Try it yourself
-Here you can test book store API http://ec2-54-86-112-238.compute-1.amazonaws.com/swagger-ui/index.html \
+Here you can test book store API http://ec2-54-162-136-159.compute-1.amazonaws.com/swagger-ui/index.html \
 If you want access `ADMIN` role you can use next credentials: 
 - email: `admin@gmail.com`
 - password: `admin1`
