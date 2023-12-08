@@ -11,11 +11,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
+import maksym.fedorenko.bookstore.dto.exception.ErrorResponseWrapper;
 import maksym.fedorenko.bookstore.dto.shoppingcart.CartDto;
 import maksym.fedorenko.bookstore.dto.shoppingcart.CartItemDto;
 import maksym.fedorenko.bookstore.dto.shoppingcart.CreateCartItemRequestDto;
 import maksym.fedorenko.bookstore.dto.shoppingcart.UpdateCartItemRequestDto;
-import maksym.fedorenko.bookstore.exception.ErrorResponseWrapper;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;

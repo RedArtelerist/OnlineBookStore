@@ -18,7 +18,7 @@ import lombok.SneakyThrows;
 import maksym.fedorenko.bookstore.dto.book.BookDto;
 import maksym.fedorenko.bookstore.dto.book.CreateBookRequestDto;
 import maksym.fedorenko.bookstore.dto.book.UpdateBookRequestDto;
-import maksym.fedorenko.bookstore.exception.ErrorResponseWrapper;
+import maksym.fedorenko.bookstore.dto.exception.ErrorResponseWrapper;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;

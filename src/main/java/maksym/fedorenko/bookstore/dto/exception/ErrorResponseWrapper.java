@@ -1,4 +1,4 @@
-package maksym.fedorenko.bookstore.exception;
+package maksym.fedorenko.bookstore.dto.exception;
 
 import java.time.LocalDateTime;
 
